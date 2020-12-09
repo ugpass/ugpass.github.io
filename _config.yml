@@ -5,6 +5,13 @@
 # theme
 # https://www.haomwei.com/technology/maupassant-hexo.html
 
+# hexo g 打包
+# hexo s 本地预览
+# hexo d 发布到git
+
+# branch hexo source code
+# branch master blog ugpass.github.io 
+
 # Site
 title: Leisure
 subtitle: ''
