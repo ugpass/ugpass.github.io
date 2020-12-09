@@ -1,0 +1,35 @@
+---
+title:      "OpenGL渲染架构" 
+date:       2020-07-07
+tags:
+    - OpenGL 
+categories:
+    - OpenGL 
+---
+
+##### OpenGL的渲染架构图
+![image.png](https://upload-images.jianshu.io/upload_images/1395687-267fdf98b61c2884.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+##### OpenGL渲染主架构
+
+OpenGL渲染架构分为**客户端(Client)**和**服务端(Server)**。
+
+**客户端**主要指CPU中运行的代码，包括C/C++代码以及OpenGL的相关代码。
+
+**服务端**指的是调用GPU芯片。
+
+开发过程中就是不断执行CPU中的代码，通过交互通道传递数据给服务端，间接的驱动GPU。
+
+##### 交互通道
+
+OpenGL提供了三个通道向GPU传递数据，分别是`Attributes(属性通道)`、`Uniform(统一变量通道)`、`Texture Data(纹理通道)`。
+
+`Attributes(属性通道)`：只能够向顶点着色器传递数据，不过可以间接的通过属性通道向片元着色器传递数据。主要传递经常变化的数据，如颜色数据，顶点数据，纹理坐标，光照法线等数据。
+
+`Uniform(统一变量通道)`：可以向顶点着色器和片元着色器传递数据。通常用来传递不变的数据，如变换矩阵、模型矩阵、平移/旋转/缩放矩阵等。
+
+`Texture Data(纹理通道)`：虽然可以向顶点着色器和片元着色器传递数据，但传递到顶点着色器是没有意义的，因为纹理处理主要是在片元着色器中。主要用来传递纹理数据。
+
+
+参考[OpenGL初探之了解OpenGL渲染架构]([https://juejin.im/post/5d67e4cef265da03dc0783a1](https://juejin.im/post/5d67e4cef265da03dc0783a1)
+)

@@ -1,0 +1,127 @@
+---
+title:      "iOS离屏渲染解析" 
+date:       2020-07-07
+tags:
+    - iOS 
+categories:
+    - iOS 
+---
+
+#### iOS渲染层级
+![image.png](https://upload-images.jianshu.io/upload_images/1395687-fe1ebb709a67ec63.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+CoreAnimation核心动画是由Layer Kit演变而来，所以它并不是只能做关于动画方面的，它可以理解为一个复合引擎，目的是更快的组合屏幕上不同的显示内容。
+
+#### 离屏渲染的定义
+
+- 没有离屏渲染时：
+
+![image.png](https://upload-images.jianshu.io/upload_images/1395687-659cbf151a302125.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+App通过CPU和GPU的配合，将渲染数据放入帧缓冲区，视频控制器不断的从帧缓冲区取出数据显示到显示屏上。
+
+
+- 离屏渲染时：
+
+![image.png](https://upload-images.jianshu.io/upload_images/1395687-d2ac9771c8d44dd6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+和未发生离屏渲染时相比，App并不是直接将数据放入帧缓冲区，而是额外先开辟一个离屏缓冲区(Offscreen Buffer)，在离屏缓冲区将渲染内容进行额外渲染和合并之后，再将数据送入帧缓冲区。
+
+> Offscreen Buffer存储最大限制为屏幕像素的2.5倍
+
+#### 理解圆角CornerRadius和离屏渲染的关系
+
+###### 问题：`btn.layer.cornerRadius = 5; btn.layer.maskToBounds = YES;`一定会触发离屏渲染吗？
+
+CornerRadius的官方文档解释：只对layer的background和border起作用，并不会作用于contents。但是设置`masksToBounds `对应UIView的`clipsToBounds `则会对内容进行裁剪。
+
+```
+Setting the radius to a value greater than 0.0 causes the layer to begin drawing           
+rounded corners on its background. By default, the corner radius does not apply 
+to the image in the layer’s contents property; it applies only to the background 
+color and border of the layer. However, setting the masksToBounds property to 
+YES causes the content to be clipped to the rounded corners.
+```
+
+案例1:按钮设置图片 即在按钮上添加一个ImageView，则有两个图层，做圆角需要对两个图层进行裁剪，则会触发离屏渲染。
+
+```
+    UIButton *btn1 = [UIButton buttonWithType:UIButtonTypeCustom];
+    btn1.frame = CGRectMake(100, 30, 100, 100);
+    btn1.layer.cornerRadius = 50;
+    [self.view addSubview:btn1];
+    
+    [btn1 setImage:[UIImage imageNamed:@"btn.png"] forState:UIControlStateNormal];
+    btn1.clipsToBounds = YES;
+```
+
+案例2:按钮添加背景色、设置border，仍然只有按钮一个图层做圆角，并不会触发离屏渲染。
+
+```
+    UIButton *btn2 = [UIButton buttonWithType:UIButtonTypeCustom];
+    btn2.frame = CGRectMake(100, 180, 100, 100);
+    btn2.layer.cornerRadius = 50;
+    btn2.backgroundColor = [UIColor blueColor];
+    [self.view addSubview:btn2];
+    btn2.clipsToBounds = YES;
+```
+
+案例3:ImageView设置图片和背景色，两个图层做圆角，则会触发离屏渲染。
+
+```
+    UIImageView *img1 = [[UIImageView alloc]init];
+    img1.frame = CGRectMake(100, 320, 100, 100);
+    img1.backgroundColor = [UIColor blueColor];
+    [self.view addSubview:img1];
+    img1.layer.cornerRadius = 50;
+    img1.layer.masksToBounds = YES;
+    img1.image = [UIImage imageNamed:@"btn.png"];
+```
+
+案例4:ImageView只设置图片，只有一个图层做圆角则不会触发离屏渲染。
+
+```
+    UIImageView *img2 = [[UIImageView alloc]init];
+    img2.frame = CGRectMake(100, 480, 100, 100);
+    [self.view addSubview:img2];
+    img2.layer.cornerRadius = 50;
+    img2.layer.masksToBounds = YES;
+    img2.image = [UIImage imageNamed:@"btn.png"];
+```
+
+常见对触发离屏渲染的几种情况：
+ 
+ - 使用了mask的layer (layer.mast)
+
+ - 需要进行裁剪的layer (layer.mastToBounds / view.clipToBounds)
+
+ - 设置了组透明度为YES，并且透明度不为1的layer (layer.allowsGroupOpacity / layer.opacity)
+
+ - 添加了阴影的layer (layer.shadow)
+
+ - 采用了光栅化的layer (layer.shouldRasterize)
+
+ - 绘制了文字的layer (UILabel, CATextLayer, Core Text 等)
+
+总结：离屏渲染出现原因是由于多个图层需要进行裁剪/混合等处理，需要放入offscreen buffer所造成的。我理解的这里的一个图层并不等于一个CALayer，一个CALayer可以包含多个图层。
+
+#### 离屏渲染产生的问题
+
+ - APP需要额外的开辟Offscreen Buffer空间，大量的离屏渲染可能造成内存的压力。
+ - 需要在Offscreen Buffer和Frame Buffer之前进行频繁切换，需要长时间的处理
+
+对应的造成**性能问题**以及**掉帧**。
+
+#### 需要使用离屏渲染的场景
+
+ - 特殊效果：需要使用offscreen Buffer保存中间状态，不得不使用离屏渲染，此时由系统自动触发，如圆角、阴影、组透明度等。
+
+- 提升效率：重复的、静态的资源打开光栅化(shouldRasterize)可以节约之后渲染的时间。打开光栅化需要注意以下几点：
+ 
+   + 如果layer不能复用，则没有必要打开光栅化。
+
+   + 如果layer不是静态的，需要被频繁修改。比如动画，打开光栅化反而影响效率。
+
+    + 离屏渲染缓存内容有时间限制，如果超过100ms没有被使用，则被丢弃，无法复用。
+
+    + 离屏渲染缓存空间最大为屏幕像素的2.5倍，超过则则会失效，无法复用。

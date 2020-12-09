@@ -1,0 +1,134 @@
+---
+title:      "iOS图片解码" 
+date:       2020-07-03
+tags:
+    - iOS 
+categories:
+    - iOS 
+---
+
+参考[iOS图片解码实践]([http://lemon2well.top/2018/09/04/iOS%20%E5%BC%80%E5%8F%91/iOS%E5%9B%BE%E7%89%87%E8%A7%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/](http://lemon2well.top/2018/09/04/iOS%20%E5%BC%80%E5%8F%91/iOS%E5%9B%BE%E7%89%87%E8%A7%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/)
+) / [iOS图像解码和最佳实践]([https://blog.jamchenjun.com/2018/08/22/image-and-graphics-best-practices.html](https://blog.jamchenjun.com/2018/08/22/image-and-graphics-best-practices.html)
+) / [SDWebImage]([https://github.com/SDWebImage/SDWebImage](https://github.com/SDWebImage/SDWebImage)
+) /  [YYImage]([https://github.com/ibireme/YYImage](https://github.com/ibireme/YYImage)
+)
+
+### `imageNamed` 和  `imageWithContentsOfFile`的区别
+
+####  1、```+ (UIImage *)imageNamed:(NSString *)name;```
+
+`name`：图片资源或文件的名称。对于assets中的资源，是指定的图片资源名称，图片资源中可以包含1x、2x、3x图片，系统会自动选择。对于png图像可以省略扩展名，对于其他格式图片需要始终包含文件扩展名。
+
+当在assets目录中查找时，查找`symbol image`优先于同名当`bitmap image`。由于`symbol image`仅支持iOS13及之后版本，所以可能需要在assets中包含两套图片格式，系统会在早期iOS版本自动选择`bitmap image`，不过我觉得一般没人这么干吧~。不能使用这个方法加载系统的`symbol image`,需要使用`systemImageNamed:`方法。
+
+这个方法会根据指定的名称在系统缓存中查找，选择最适合屏幕的image返回。如果系统缓存中没有找到，则从asstes目录或磁盘中找到正确的图片创建一个image返回。系统会随时清空图片缓存，当然仅仅是清空未使用的图片缓存。
+
+这个方法在iOS9之后是线程安全的。
+
+Tip:
+> 如果仅加载一次图片或者不想要添加到系统缓存中，可以使用`imageWithContentsOfFile`方法创建image。保证使用次数少的图片不添加到系统缓存中，可以有效提高App内存使用效率。
+
+#### 2、```+ (UIImage *)imageWithContentsOfFile:(NSString *)path;```
+
+这个方法不会缓存image对象。而且只会根据文件名获取，并不会根据2x、3x自动创建。
+
+### 图片解压缩
+
+> 由于png、jpeg等图片格式均是压缩的位图图片，在显示时需要解码成位图。png是无损压缩且支持alpha通道，jpeg是有损压缩。
+
+```
+    UIImageView *imgV = [[UIImageView alloc] initWithFrame:self.view.bounds];
+    UIImage *image = [UIImage imageNamed:@"test.jpeg"];
+    [self.view addSubview:imgV];
+```
+上述代码第一次加载时做了如下操作：
+ + 从磁盘加载test.jpeg图片到内存中为 `Data Buffer`
+ + 当图片真正要被显示在屏幕上时，会触发解码，`Data Buffer` ---> `Image Buffer`
+ + 然后`Image Buffer`传递给GPU,GPU经过顶点坐标转换、顶点着色器、光栅化、片元着色器等步骤转化为`Frame Buffer`存在帧缓冲区，等待屏幕刷新显示
+
+下面代码通过`CGBitmapContextCreateImage`从图形上下文中获取到解码到位图。
+
+```
++ (void)decodeSourceImage:(UIImage *)sourceImage completion:(nonnull void (^)(UIImage * _Nonnull))completion {
+    if (!sourceImage) return;
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        //获取图片宽高
+        CGImageRef cgimage = sourceImage.CGImage;
+        size_t width = CGImageGetWidth(cgimage);
+        size_t height = CGImageGetHeight(cgimage);
+        if (width == 0 || height == 0) return;
+        
+        //判断是否有alpha通道
+        CGImageAlphaInfo alphaInfo = CGImageGetAlphaInfo(cgimage) & kCGBitmapAlphaInfoMask;
+        BOOL hasAlpha = !(alphaInfo == kCGImageAlphaNone ||
+                          alphaInfo == kCGImageAlphaNoneSkipFirst ||
+                          alphaInfo == kCGImageAlphaNoneSkipLast);
+        
+        CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host;
+        bitmapInfo |= hasAlpha ? kCGImageAlphaPremultipliedFirst : kCGImageAlphaNoneSkipFirst;
+        
+        CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+        //创建图形上下文
+        CGContextRef context = CGBitmapContextCreate(NULL, width, height, 8, 0, colorSpace, bitmapInfo);
+        if (!context) return;
+        //绘制到上下文中解压
+        CGContextDrawImage(context, CGRectMake(0, 0, width, height), cgimage); // decode
+        //从上下文中获取
+        CGImageRef newCgimage = CGBitmapContextCreateImage(context);
+        UIImage *desImage = [UIImage imageWithCGImage:newCgimage];
+        CGContextRelease(context);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (completion) {
+                completion(desImage);
+            }
+        });
+    });
+}
+```
+ 
+YYKit中提供了另一种解码方式如下，在注释中说使用原始数据解码会造成丢失一些精度。
+
+```
+  + (void)decodeSourceImage1:(UIImage *)sourceImage completion:(nonnull void (^)(UIImage * _Nonnull))completion {
+    if (!sourceImage) return;
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        CGImageRef cgimage = sourceImage.CGImage;
+        size_t width = CGImageGetWidth(cgimage);
+        size_t height = CGImageGetHeight(cgimage);
+        if (width == 0 || height == 0) return;
+        
+        CGColorSpaceRef colorSpace = CGImageGetColorSpace(cgimage);
+        size_t bitsPerComponent = CGImageGetBitsPerComponent(cgimage);
+        size_t bitsPerPixel = CGImageGetBitsPerPixel(cgimage);
+        size_t bytesPerRow = CGImageGetBytesPerRow(cgimage);
+        CGBitmapInfo bitmapInfo = CGImageGetBitmapInfo(cgimage);
+        if (bytesPerRow == 0 || width == 0 || height == 0) return;
+        
+        CGDataProviderRef provider = CGImageGetDataProvider(cgimage);
+        if (!provider) return;
+        //获取原始数据
+        CFDataRef data = CGDataProviderCopyData(provider);
+        if (!data) return;
+        
+        CGDataProviderRef newProvider = CGDataProviderCreateWithCFData(data);
+        CFRelease(data);
+        if (!newProvider) return;
+        
+        CGImageRef newImageRef = CGImageCreate(width, height, bitsPerComponent, bitsPerPixel, bytesPerRow, colorSpace, bitmapInfo, newProvider, NULL, false, kCGRenderingIntentDefault);
+        UIImage *desImage = [UIImage imageWithCGImage:newImageRef]; 
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (completion) {
+                completion(desImage);
+            }
+        });
+        
+    });
+}
+```
+
+
+
+
+
+
+

@@ -1,0 +1,62 @@
+---
+title:      "iOS保持界面流畅" 
+date:       2020-07-04
+tags:
+    - iOS 
+categories:
+    - iOS 
+---
+
+参考[YYKit作者的博客]([https://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/](https://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/)
+)
+
+### CPU和GPU的区别
+
+CPU(中央处理器 Center Processing Unit)：是计算机的运算、控制、缓存处理核心，常用来处理复杂的逻辑以及数据结构，CPU中的并行其实是通过时间切片完成的。任务之间依赖性高。
+
+GPU(图形处理器 Graphics Processing Unit)：是一种专门处理绘图运算的微型处理器，在OpenGL中使用GLSL语言来驱动，功能单一，由许多计算单元组成，任务之间依赖性低。
+
+---
+
+### UIView和CALayer的联系与区别
+
+#### UIView和CALayer的联系
+
+- UIView的实力对象中默认有一个属性CALayer
+- UIView负责显示内容的管理，CALayer负责具体的显示
+- UIView是对CALayer的封装，并实现了CALayer代理的方法
+
+#### UIView和CALayer的区别
+ 
+- UIView继承自UIResponder，CALayer继承自NSObject
+- UIView可以响应事件，CALayer不可以
+
+### 图像显示原理
+
+CPU、GPU以及显示器协作完成显示。
+
+1. 早期的显示是**随机扫描显示**,扫描时间和图形复杂度有关。
+
+2. 之后出现了**光栅扫描显示**，图像组成了像素阵列，从上到下逐行扫描，和图形复杂度无关。
+
+- 简单的光栅扫描显示由于CPU和GPU的处理复杂程度，会造成GPU扫描显示时，扫描到一半，CPU的数据刷新GPU的缓冲区，显示造成**撕裂**效果。
+
+- 从而引出了 **垂直同步信号Vsync** 和 **双缓冲区** 机制。
+
+  **Vsync信号**用来解决**撕裂**问题，相当于给帧缓冲区加了锁，必须扫描显示完一帧才会接收下一帧的数据。
+
+  **双缓冲区**用来解决CPU和GPU的处理效率问题。视频控制器读取完缓冲区一帧后，会将指针指向第二个缓冲区。
+
+   当开启Vsync垂直同步后，GPU会等待显示器的Vsync信号，进行新一帧的渲染和缓冲区的更新，从而需要耗费更多的计算资源，同时也有可能造成**掉帧**现象。**掉帧**是指当接收到Vsync信号时，CPU或GPU还没有准备够足后的数据，视频控制器拿不到Frame Buffer，仍然显示上一帧画面。
+
+- **三级缓存** 和 **Vsync垂直同步**：提供多缓冲区，当Vsync信号出现时有足够的数据去显示，降低**掉帧**出现的概率。
+
+### 产生卡顿的原因
+
+CPU负责计算显示的内容，如试图创建、布局计算、图片解码、文本绘制等。CPU计算好之后提交到GPU，由GPU进行一系列处理之后提交到帧缓冲区。当接收到Vsync信号，视频控制器从缓冲区中读取数据。如果在一个Vsync时间内，CPU或GPU没有来得及提交下一帧的数据，视频控制器会显示上一帧的，即界面保持不变，这就是卡顿的原因。
+
+解决卡顿的方案待理解补充，[YYKit作者的博客]([https://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/](https://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/)
+)写的很详细了。
+
+有理解不当之处，欢迎指正。
+ 
