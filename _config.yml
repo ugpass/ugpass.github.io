@@ -118,6 +118,8 @@ deploy:
   type: git
   repository: https://github.com/ugpass/ugpass.github.io
   branch: master
+  name: ugpass
+  email: 565131583@qq.com
  
 # # Analytics settings
 # # Baidu Analytics
