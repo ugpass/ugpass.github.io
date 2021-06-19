@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Leisure">
+
+
+
+    <meta name="description" content="悄悄的-开心😄">
+
+
+    <meta name="keywords" content="Leisure leisure iOS iPhone">
+
+
+<title>OpenGL正背面剔除和深度测试 | Leisure</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Bentham&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Bentham&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">OpenGL正背面剔除和深度测试</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Leisure</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">七月 10, 2020&nbsp;&nbsp;0:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/OpenGL/">OpenGL</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>在绘制3D图形时，应该判断哪些面对于观察者可见，哪些面对于观察者不可见。不可见部分应该及时丢弃，以提高渲染效率。<br>专业术语叫做“消除隐藏面”……</p>
+<p><strong>正面</strong>：按逆时针顶点连接顺序绘制的三角形。<br><strong>背面</strong>：按顺时针顶点连接顺序绘制的三角形。</p>
+<blockquote>
+<p>Note：由于观察者角度不同，正面和背面可能不同。</p>
+</blockquote>
+<h4 id="1、油画算法"><a href="#1、油画算法" class="headerlink" title="1、油画算法"></a>1、油画算法</h4><p><img src="https://upload-images.jianshu.io/upload_images/1395687-6787b795eed70506.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="油画算法"></p>
+<p>先绘制离观察者比较远的三角形，再在它们上方绘制距离比较近的三角形。</p>
+<p>油画算法只能解决排序好的三角形渲染，且重叠部分渲染性能较差，而且也不能区分未排序的叠加三角形。</p>
+<p>####正背面剔除</p>
+<p>对正面和背面三角形进行区分的原因之一就是为了剔除。</p>
+<p>背面剔除能够极大的提高性能。剔除即在图元装配阶段就整体抛弃了一些三角形，并且没有执行任何不恰当的光栅化操作。</p>
+<p>正面剔除也很有用，如在需要显示某些图形内部渲染的时候。渲染透明对象时，会对对象进行两次渲染，第一次开启透明并剔除正面，第二次剔除背面。</p>
+<p><strong>设置剔除正面还是剔除背面函数</strong></p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">glCullFace</span><span class="params">(GLenum mode)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>mode参数可用值：<code>GL_FRONT</code>/<code>GL_BACK</code>/<code>GL_FRONT_AND_BACK</code></p>
+<p><strong>开启和关闭剔除</strong></p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">glEnable(GL_CULL_FACE)<span class="comment">;</span></span><br><span class="line">glDisable(GL_CULL_FACE)<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+
+<p>所以消除不透明物体内部几何图形只需要如下代码：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">glCullFace(GL_BACK)<span class="comment">;</span></span><br><span class="line">glEnable(GL_CULL_FACE)<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="深度测试"><a href="#深度测试" class="headerlink" title="深度测试"></a>深度测试</h4><p><strong>深度缓冲区</strong>：指的是一块存储像素深度(z值)的内存区域。深度值范围[0, 1]之间，根据观察者的位置，如果观察者在z轴正值方向，则深度值越大，离观察者越近；相反如果观察者在z轴负值方向，则深度值越大，离观察者越远。</p>
+<p><strong>深度测试</strong>：OpenGL执行深度测试时，如果深度测试通过，则使用新的像素深度值覆盖深度缓冲区中的值，如果测试未通过，则丢弃该像素。</p>
+<p>开启/关闭深度测试：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">glEnable(GL_DEPTH_TEST)<span class="comment">;</span></span><br><span class="line">glDisable(GL_DEPTH_TEST)<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+
+<p>清除颜色缓冲区和深度缓冲区，深度缓冲区默认值为1</p>
+<figure class="highlight arcade"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);</span><br><span class="line"><span class="string">``</span><span class="string">``</span></span><br><span class="line"></span><br><span class="line">深度缓冲区写入开关</span><br></pre></td></tr></table></figure>
+<p>//value: GL_TURE,开启深度缓冲区写入; GL_FALSE,关闭深度缓冲区写⼊<br>void glDepthMask(GLBool value);</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">深度测试函数：定义深度测试通过的规则</span><br></pre></td></tr></table></figure>
+<p>glDepthFunc(GL_LESS);</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">|<span class="string">  运算符   </span>|<span class="string"> 描述  </span>|</span><br><span class="line">|<span class="string">  ----  </span>|<span class="string"> ----  </span>|</span><br><span class="line">|<span class="string"> GL_ALWAYS  </span>|<span class="string"> 永远通过测试 </span>|</span><br><span class="line">|<span class="string"> GL_NEVER </span>|<span class="string"> 永远不通过测试 </span>|</span><br><span class="line">|<span class="string"> GL_LESS  </span>|<span class="string"> 在片段深度值小于缓冲区的深度时通过测试  </span>|</span><br><span class="line">|<span class="string"> GL_EQUAL  </span>|<span class="string"> 在片段深度值等于缓冲区的深度时通过测试  </span>|</span><br><span class="line">|<span class="string"> GL_LEQUAL  </span>|<span class="string"> 在片段深度值小于等于缓冲区的深度时通过测试  </span>|</span><br><span class="line">|<span class="string"> GL_GREATER  </span>|<span class="string"> 在片段深度值大于缓冲区的深度时通过测试  </span>|</span><br><span class="line">|<span class="string"> GL_NOTEQUAL  </span>|<span class="string"> 在片段深度值不等于缓冲区的深度时通过测试  </span>|</span><br><span class="line">|<span class="string"> GL_GEQUAL  </span>|<span class="string"> 在片段深度值大于等于缓冲区的深度时通过测试  </span>|<span class="string"> </span></span><br><span class="line"></span><br><span class="line"><span class="string">默认是`GL_LESS`,即丢弃深度值大于或等于当前缓冲区深度的像素。</span></span><br><span class="line"></span><br><span class="line"><span class="string">###### 深度测试引起的`Z-Fighting`(`Z冲突/闪烁`)问题</span></span><br><span class="line"></span><br><span class="line"><span class="string">**原因**：深度缓冲区精度有限制，深度差别非常小的情况下，OpenGL分不清前后造成的。</span></span><br><span class="line"></span><br><span class="line"><span class="string">**解决办法**：</span></span><br><span class="line"></span><br><span class="line"><span class="string">**多边形偏移 Polygon Offset**:在两个图层之间添加一个偏移，但是手动添加比较复杂且不精准，所以需要用到多边形偏移。</span></span><br><span class="line"></span><br><span class="line"><span class="string">开启多边形偏移</span></span><br></pre></td></tr></table></figure>
+<p>glEnable(GL_POLYGON_OFFSET_FILL)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">指定偏移量</span><br></pre></td></tr></table></figure>
+<p>glPolygonOffset(GLFloat factor, GLFloat units);</p>
+<p>```</p>
+<p>factor和units一般是-1和-1.</p>
+<p><strong>预防</strong>：</p>
+<pre><code>1. 不要将两个物体靠太近，避免渲染时三角形叠在一起。
+
+2. 尽可能将近裁剪面设置的离观察者远一点。
+
+3. 使用高位数的深度缓冲区，精度更高。
+</code></pre>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Leisure</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://ugpass.github.io/2020/07/10/2020-07-10-OpenGL%E6%AD%A3%E8%83%8C%E9%9D%A2%E5%89%94%E9%99%A4%E5%92%8C%E6%B7%B1%E5%BA%A6%E6%B5%8B%E8%AF%95/">http://ugpass.github.io/2020/07/10/2020-07-10-OpenGL%E6%AD%A3%E8%83%8C%E9%9D%A2%E5%89%94%E9%99%A4%E5%92%8C%E6%B7%B1%E5%BA%A6%E6%B5%8B%E8%AF%95/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/OpenGL/"># OpenGL</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/07/13/2020-07-13-OpenGL%E9%A2%9C%E8%89%B2%E6%B7%B7%E5%90%88/">OpenGL颜色混合</a>
+            
+            
+            <a class="next" rel="next" href="/2020/07/07/2020-07-07-OpenGL%E6%9E%B6%E6%9E%84/">OpenGL渲染架构</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Leisure | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Leisure">
+
+
+
+    <meta name="description" content="悄悄的-开心😄">
+
+
+    <meta name="keywords" content="Leisure leisure iOS iPhone">
+
+
+<title>isa结构解析 | Leisure</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Bentham&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Bentham&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">isa结构解析</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Leisure</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">九月 10, 2020&nbsp;&nbsp;0:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/iOS%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/">iOS底层原理</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h4 id="1-isa初始化"><a href="#1-isa初始化" class="headerlink" title="1. isa初始化"></a>1. isa初始化</h4><p>在 <a href="%5Bhttps://www.jianshu.com/p/d4091f8a703a%5D(https://www.jianshu.com/p/d4091f8a703a)">iOS alloc原理分析</a> 中会 <code>initInstanceIsa</code>中初始化isa，源码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="keyword">void</span> </span><br><span class="line">objc_object::initIsa(Class cls, <span class="keyword">bool</span> nonpointer, <span class="keyword">bool</span> hasCxxDtor) </span><br><span class="line">&#123; </span><br><span class="line">    ASSERT(!isTaggedPointer()); </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (!nonpointer) &#123;</span><br><span class="line">        isa = <span class="keyword">isa_t</span>((<span class="keyword">uintptr_t</span>)cls);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        ASSERT(!DisableNonpointerIsa);</span><br><span class="line">        ASSERT(!cls-&gt;instancesRequireRawIsa());</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">isa_t</span> <span class="title">newisa</span><span class="params">(<span class="number">0</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> SUPPORT_INDEXED_ISA</span></span><br><span class="line">        ASSERT(cls-&gt;classArrayIndex() &gt; <span class="number">0</span>);</span><br><span class="line">        newisa.bits = ISA_INDEX_MAGIC_VALUE;</span><br><span class="line">        <span class="comment">// isa.magic is part of ISA_MAGIC_VALUE</span></span><br><span class="line">        <span class="comment">// isa.nonpointer is part of ISA_MAGIC_VALUE</span></span><br><span class="line">        newisa.has_cxx_dtor = hasCxxDtor;</span><br><span class="line">        newisa.indexcls = (<span class="keyword">uintptr_t</span>)cls-&gt;classArrayIndex();</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">        newisa.bits = ISA_MAGIC_VALUE;</span><br><span class="line">        <span class="comment">// isa.magic is part of ISA_MAGIC_VALUE</span></span><br><span class="line">        <span class="comment">// isa.nonpointer is part of ISA_MAGIC_VALUE</span></span><br><span class="line">        newisa.has_cxx_dtor = hasCxxDtor;</span><br><span class="line">        newisa.shiftcls = (<span class="keyword">uintptr_t</span>)cls &gt;&gt; <span class="number">3</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// This write must be performed in a single store in some cases</span></span><br><span class="line">        <span class="comment">// (for example when realizing a class because other threads</span></span><br><span class="line">        <span class="comment">// may simultaneously try to use the class).</span></span><br><span class="line">        <span class="comment">// fixme use atomics here to guarantee single-store and to</span></span><br><span class="line">        <span class="comment">// guarantee memory order w.r.t. the class index table</span></span><br><span class="line">        <span class="comment">// ...but not too atomic because we don&#x27;t want to hurt instantiation</span></span><br><span class="line">        isa = newisa;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">```  </span><br><span class="line">分析：  </span><br><span class="line">如果没有开启指针优化，则直接将类赋值给isa指针，即isa直接指向该类，`isa = <span class="keyword">isa_t</span>((<span class="keyword">uintptr_t</span>)cls);`。  </span><br><span class="line">如果开启指针优化，则以另一种形式初始化isa指针。</span><br><span class="line"></span><br><span class="line">#### <span class="number">2.</span> isa结构</span><br><span class="line">根据源码可知isa类型为`<span class="keyword">isa_t</span>`联合体类型，源码如下：  </span><br><span class="line">```  </span><br><span class="line"><span class="class"><span class="keyword">union</span> <span class="title">isa_t</span> &#123;</span></span><br><span class="line">    <span class="keyword">isa_t</span>() &#123; &#125;</span><br><span class="line">    <span class="keyword">isa_t</span>(<span class="keyword">uintptr_t</span> value) : bits(value) &#123; &#125;</span><br><span class="line"></span><br><span class="line">    Class cls;</span><br><span class="line">    <span class="keyword">uintptr_t</span> bits;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> defined(ISA_BITFIELD)</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">        ISA_BITFIELD;  <span class="comment">// defined in isa.h</span></span><br><span class="line">    &#125;;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta"># <span class="meta-keyword">if</span> __arm64__</span></span><br><span class="line"><span class="meta">#   <span class="meta-keyword">define</span> ISA_MASK        0x0000000ffffffff8ULL</span></span><br><span class="line"><span class="meta">#   <span class="meta-keyword">define</span> ISA_MAGIC_MASK  0x000003f000000001ULL</span></span><br><span class="line"><span class="meta">#   <span class="meta-keyword">define</span> ISA_MAGIC_VALUE 0x000001a000000001ULL</span></span><br><span class="line"><span class="meta">#   <span class="meta-keyword">define</span> ISA_BITFIELD                                                      \</span></span><br><span class="line">      <span class="keyword">uintptr_t</span> nonpointer        : <span class="number">1</span>;                                       \</span><br><span class="line">      <span class="keyword">uintptr_t</span> has_assoc         : <span class="number">1</span>;                                       \</span><br><span class="line">      <span class="keyword">uintptr_t</span> has_cxx_dtor      : <span class="number">1</span>;                                       \</span><br><span class="line">      <span class="keyword">uintptr_t</span> shiftcls          : <span class="number">33</span>; <span class="comment">/*MACH_VM_MAX_ADDRESS 0x1000000000*/</span> \</span><br><span class="line">      <span class="keyword">uintptr_t</span> magic             : <span class="number">6</span>;                                       \</span><br><span class="line">      <span class="keyword">uintptr_t</span> weakly_referenced : <span class="number">1</span>;                                       \</span><br><span class="line">      <span class="keyword">uintptr_t</span> deallocating      : <span class="number">1</span>;                                       \</span><br><span class="line">      <span class="keyword">uintptr_t</span> has_sidetable_rc  : <span class="number">1</span>;                                       \</span><br><span class="line">      <span class="keyword">uintptr_t</span> extra_rc          : <span class="number">19</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>联合体：又名共用体，可以包含多个不同类型的成员。结构体和联合体的区别在于结构体的各个成员会占据不同的内存，而联合体的成员共用一块内存，各个成员的首地址相同。</p>
+</blockquote>
+<p>所以在<code>isa_t</code>联合体中<code>Class cls</code>和<code>uintptr_t bits</code>是互斥的。<br>由 <code>typedef unsigned long           uintptr_t;</code> 所知，bits占据8字节，共64位，64位中存储的即<code>ISA_BITFIELD</code>宏定义中的内容。</p>
+<p><code>uintptr_t nonpointer        : 1;  </code> 是否对isa指针开启优化。0:纯isa指针 1:不只类对象地址，还包括了类信息，对象对引用计数等。<br><code>uintptr_t has_assoc        : 1;  </code> 关联对象标识位 0:没有 1:存在。<br><code>uintptr_t has_cxx_dtor    : 1;  </code> 是否有c++或objc的析构函数 如果有则需要调用析构逻辑，如果没有则可以更快释放对象。<br><code>uintptr_t shiftcls          : 33;  </code> 存储类指针的值，开启指针优化时，有33位用来存放类指针。<br><code>uintptr_t magic             : 6;  </code> 用于调试器判断当前对象是真的对象还是未初始化的空间。<br><code>uintptr_t weakly_referenced : 1;  </code> 标志对象是否被指向或曾经指向一个ARC的弱变量，没有弱引用的对象可以更快的释放。<br><code>uintptr_t deallocating      : 1; </code> 标志对象是否正在释放内存。<br><code>uintptr_t has_sidetable_rc  : 1; </code> 当引用计数大于10时，则需要借助该变量存储进位。<br><code>uintptr_t extra_rc          : 19 </code> 表示该对象的引用计数减1，如果引用计数为10，则extra_rc为9，如果引用计数大于10，则需要借助has_sidetable_rc。</p>
+<h4 id="3-isa与类关联"><a href="#3-isa与类关联" class="headerlink" title="3. isa与类关联"></a>3. isa与类关联</h4><figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">- (Class)<span class="class"><span class="keyword">class</span> &#123;</span></span><br><span class="line">    <span class="keyword">return</span> object_getClass(<span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>获取类对象，元类也是特殊的类对象</p>
+<figure class="highlight monkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">Class</span> <span class="title">object_getClass</span>(<span class="title">id</span> <span class="title">obj</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (obj) <span class="keyword">return</span> obj-&gt;getIsa();</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">return</span> Nil;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="class"><span class="keyword">Class</span> </span></span><br><span class="line">objc_object::getIsa() </span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (fastpath(!isTaggedPointer())) <span class="keyword">return</span> ISA();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">extern</span> objc_class OBJC_CLASS_$___NSUnrecognizedTaggedPointer;</span><br><span class="line">    uintptr_t slot, ptr = (uintptr_t)this;</span><br><span class="line">    <span class="class"><span class="keyword">Class</span> <span class="title">cls</span>;</span></span><br><span class="line"></span><br><span class="line">    slot = (ptr &gt;&gt; _OBJC_TAG_SLOT_SHIFT) &amp; _OBJC_TAG_SLOT_MASK;</span><br><span class="line">    cls = objc_tag_classes[slot];</span><br><span class="line">    <span class="keyword">if</span> (slowpath(cls == (<span class="class"><span class="keyword">Class</span>)&amp;<span class="title">OBJC_CLASS_</span>$<span class="title">___NSUnrecognizedTaggedPointer</span>)) &#123;</span></span><br><span class="line">        slot = (ptr &gt;&gt; _OBJC_TAG_EXT_SLOT_SHIFT) &amp; _OBJC_TAG_EXT_SLOT_MASK;</span><br><span class="line">        cls = objc_tag_ext_classes[slot];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> cls;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="class"><span class="keyword">Class</span> </span></span><br><span class="line">objc_object::ISA() </span><br><span class="line">&#123;</span><br><span class="line">    ASSERT(!isTaggedPointer()); </span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> SUPPORT_INDEXED_ISA</span></span><br><span class="line">    <span class="keyword">if</span> (isa.nonpointer) &#123;</span><br><span class="line">        uintptr_t slot = isa.indexcls;</span><br><span class="line">        <span class="keyword">return</span> classForIndex((unsigned)slot);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> (<span class="class"><span class="keyword">Class</span>)<span class="title">isa</span>.<span class="title">bits</span>;</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">    <span class="keyword">return</span> (<span class="class"><span class="keyword">Class</span>)(<span class="title">isa</span>.<span class="title">bits</span> &amp; <span class="title">ISA_MASK</span>);</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>获取类对象，即获取isa的指向。非taggedPointer的isa，最终返回<code>return (Class)(isa.bits &amp; ISA_MASK);</code></p>
+<h4 id="4-对象的本质"><a href="#4-对象的本质" class="headerlink" title="4. 对象的本质"></a>4. 对象的本质</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//main.m</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;Foundation/Foundation.h&gt;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;LSPerson.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Person</span> &#123;</span></span><br><span class="line">    <span class="keyword">char</span> * name;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span> * argv[])</span> </span>&#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        LSPerson *p1 = [[LSPerson alloc] init]; </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过<code>clang -rewrite-objc main.m -o main.cpp</code>将以上文件转成c++文件<br> <code>NSObject</code>底层结构为</p>
+<figure class="highlight capnproto"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">NSObject_IMPL</span> </span>&#123;</span><br><span class="line">	Class isa;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>LSPerson底层结构为</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">LSPerson_IMPL</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">NSObject_IMPL</span> <span class="title">NSObject_IVARS</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>因为LSPerson并没有其他成员变量，则直接继承自NSObject的结构体，所以继承自NSObject的对象都会有isa指针。</p>
+<p>属性的setter方法都会调用<code>objc_setProperty</code>函数</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">void objc<span class="constructor">_setProperty(<span class="params">id</span> <span class="params">self</span>, SEL <span class="params">_cmd</span>, <span class="params">ptrdiff_t</span> <span class="params">offset</span>, <span class="params">id</span> <span class="params">newValue</span>, BOOL <span class="params">atomic</span>, <span class="params">signed</span> <span class="params">char</span> <span class="params">shouldCopy</span>)</span> </span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">bool</span> copy = (shouldCopy<span class="operator"> &amp;&amp; </span>shouldCopy != MUTABLE_COPY);</span><br><span class="line">    <span class="built_in">bool</span> mutableCopy = (shouldCopy<span class="operator"> == </span>MUTABLE_COPY);</span><br><span class="line">    really<span class="constructor">SetProperty(<span class="params">self</span>, <span class="params">_cmd</span>, <span class="params">newValue</span>, <span class="params">offset</span>, <span class="params">atomic</span>, <span class="params">copy</span>, <span class="params">mutableCopy</span>)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static inline void really<span class="constructor">SetProperty(<span class="params">id</span> <span class="params">self</span>, SEL <span class="params">_cmd</span>, <span class="params">id</span> <span class="params">newValue</span>, <span class="params">ptrdiff_t</span> <span class="params">offset</span>, <span class="params">bool</span> <span class="params">atomic</span>, <span class="params">bool</span> <span class="params">copy</span>, <span class="params">bool</span> <span class="params">mutableCopy</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (offset<span class="operator"> == </span><span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">object</span><span class="constructor">_setClass(<span class="params">self</span>, <span class="params">newValue</span>)</span>;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    id oldValue;</span><br><span class="line">    id *slot = (id*) ((<span class="built_in">char</span>*)self + offset);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (copy) &#123;</span><br><span class="line">        newValue = <span class="literal">[<span class="identifier">newValue</span> <span class="identifier">copyWithZone</span>:<span class="identifier">nil</span>]</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (mutableCopy) &#123;</span><br><span class="line">        newValue = <span class="literal">[<span class="identifier">newValue</span> <span class="identifier">mutableCopyWithZone</span>:<span class="identifier">nil</span>]</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (*slot<span class="operator"> == </span>newValue) return;</span><br><span class="line">        newValue = objc<span class="constructor">_retain(<span class="params">newValue</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!atomic) &#123;</span><br><span class="line">        oldValue = *slot;</span><br><span class="line">        *slot = newValue;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        spinlock_t&amp; slotlock = PropertyLocks<span class="literal">[<span class="identifier">slot</span>]</span>;</span><br><span class="line">        slotlock.lock<span class="literal">()</span>;</span><br><span class="line">        oldValue = *slot;</span><br><span class="line">        *slot = newValue;        </span><br><span class="line">        slotlock.unlock<span class="literal">()</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    objc<span class="constructor">_release(<span class="params">oldValue</span>)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>总结为retain新值，release旧值。</p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Leisure</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://ugpass.github.io/2020/09/10/2020-09-10-isa%E7%BB%93%E6%9E%84%E8%A7%A3%E6%9E%90/">http://ugpass.github.io/2020/09/10/2020-09-10-isa%E7%BB%93%E6%9E%84%E8%A7%A3%E6%9E%90/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/iOS%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/"># iOS底层原理</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/09/13/2020-09-13-iOS%20%E7%B1%BB%E7%9A%84%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90/">iOS 类的结构分析</a>
+            
+            
+            <a class="next" rel="next" href="/2020/09/06/2020-09-06-iOS%20alloc%E5%8E%9F%E7%90%86/">iOS alloc原理分析</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Leisure | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>
