@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Leisure">
+
+
+
+    <meta name="description" content="悄悄的-开心😄">
+
+
+    <meta name="keywords" content="Leisure leisure iOS iPhone">
+
+
+<title>翻转纹理的5种方式 | Leisure</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Leisure&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Leisure&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">翻转纹理的5种方式</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Leisure</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">八月 2, 2020&nbsp;&nbsp;0:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/OpenGL-ES/">OpenGL ES</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>由于<code>CoreGraphics</code>坐标系与<code>UIKit</code>坐标系不一致，导致<code>CoreGraphics</code>解码图片加载纹理后，图片显示倒置，下面介绍五种翻转纹理的方式。</p>
+<p>方式一：在顶点着色器中，给顶点坐标乘以一个旋转矩阵，之后再赋值给内建变量<code>gl_Position</code>。</p>
+<p>即顶点着色器代码改为</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">attribute</span> <span class="type">vec4</span> position;</span><br><span class="line"><span class="keyword">attribute</span> <span class="type">vec2</span> textCoordinate;</span><br><span class="line"><span class="keyword">varying</span> <span class="keyword">lowp</span> <span class="type">vec2</span> varyTextCoord;</span><br><span class="line"><span class="keyword">uniform</span> <span class="type">mat4</span> rotateMatrix;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main() &#123;</span><br><span class="line">    varyTextCoord = textCoordinate;</span><br><span class="line">    </span><br><span class="line">    <span class="type">vec4</span> vPos = position;</span><br><span class="line">    vPos = vPos * rotateMatrix;</span><br><span class="line">    <span class="built_in">gl_Position</span> = vPos;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意，如果想要获取shader里面的变量，必须要在glLinkProgram后面！</p>
+</blockquote>
+<p>在开始绘制步骤中 设置纹理采样器<code>glUniform1i</code> 和 开始绘制<code>glDrawArrays</code>之间将旋转矩阵传入顶点着色器。</p>
+<p><strong>设置旋转矩阵，旋转纹理</strong></p>
+<figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//设置旋转矩阵</span></span><br><span class="line">- (<span class="keyword">void</span>)rotateTexture &#123;</span><br><span class="line">    <span class="comment">//获取shader中的 rotateMatrix 变量</span></span><br><span class="line">    GLuint <span class="built_in">rotate</span> = glGetUniformLocation(self.program, <span class="string">&quot;rotateMatrix&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//设置旋转弧度</span></span><br><span class="line">    <span class="built_in">float</span> <span class="built_in">radians</span> = <span class="number">180</span> * <span class="number">3.14159</span>f / <span class="number">180.0</span>f;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//求弧度对于的sin/cos值</span></span><br><span class="line">    <span class="built_in">float</span> s = <span class="built_in">sin</span>(<span class="built_in">radians</span>);</span><br><span class="line">    <span class="built_in">float</span> c = <span class="built_in">cos</span>(<span class="built_in">radians</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//旋转矩阵</span></span><br><span class="line">    GLfloat zRotation[<span class="number">16</span>] = &#123;</span><br><span class="line">        c,-s,<span class="number">0</span>,<span class="number">0</span>,</span><br><span class="line">        s,c,<span class="number">0</span>,<span class="number">0</span>,</span><br><span class="line">        <span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>,</span><br><span class="line">        <span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span></span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//设置旋转矩阵</span></span><br><span class="line">    glUniformMatrix4fv(<span class="built_in">rotate</span>, <span class="number">1</span>, GL_FALSE, zRotation);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>方法二：使用CoreGraphics函数 对图片做翻转</p>
+<p>在 加载纹理函数 <code>- (GLuint)setupTexture:(NSString *)filePath</code> 中，解码图片后，翻转坐标，再次重新绘制一次</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="constructor">CGContextDrawImage(<span class="params">cgContext</span>, <span class="params">rect</span>, <span class="params">cgImage</span>)</span>;</span><br><span class="line"></span><br><span class="line"><span class="constructor">CGContextTranslateCTM(<span class="params">cgContext</span>, <span class="params">rect</span>.<span class="params">origin</span>.<span class="params">x</span>, <span class="params">rect</span>.<span class="params">origin</span>.<span class="params">y</span>)</span>;</span><br><span class="line"><span class="constructor">CGContextTranslateCTM(<span class="params">cgContext</span>, 0, <span class="params">height</span>)</span>;</span><br><span class="line"><span class="constructor">CGContextScaleCTM(<span class="params">cgContext</span>, 1.0, -1.0)</span>;</span><br><span class="line"><span class="constructor">CGContextTranslateCTM(<span class="params">cgContext</span>, -<span class="params">rect</span>.<span class="params">origin</span>.<span class="params">x</span>, -<span class="params">rect</span>.<span class="params">origin</span>.<span class="params">y</span>)</span>;</span><br><span class="line"><span class="constructor">CGContextDrawImage(<span class="params">cgContext</span>, <span class="params">rect</span>, <span class="params">cgImage</span>)</span>;</span><br><span class="line"></span><br><span class="line"><span class="constructor">CGContextRelease(<span class="params">cgContext</span>)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>方法三：修改片元着色器，对纹理坐标的y值进行翻转</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">precision</span> <span class="keyword">highp</span> <span class="type">float</span>;</span><br><span class="line"><span class="keyword">varying</span> <span class="keyword">lowp</span> <span class="type">vec2</span> varyTextCoord;</span><br><span class="line"><span class="keyword">uniform</span> <span class="type">sampler2D</span> colorMap;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main() &#123;</span><br><span class="line">    <span class="keyword">lowp</span> <span class="type">vec4</span> temp = <span class="built_in">texture2D</span>(colorMap, <span class="type">vec2</span>(varyTextCoord.x,<span class="number">1.0</span>-varyTextCoord.y));</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">gl_FragColor</span> = temp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>方法四：修改顶点着色器中的纹理坐标，对y值进行翻转</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">attribute</span> <span class="type">vec4</span> position;</span><br><span class="line"><span class="keyword">attribute</span> <span class="type">vec2</span> textCoordinate;</span><br><span class="line"><span class="keyword">varying</span> <span class="keyword">lowp</span> <span class="type">vec2</span> varyTextCoord;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main() &#123;</span><br><span class="line">    varyTextCoord = <span class="type">vec2</span>(textCoordinate.x,<span class="number">1.0</span>-textCoordinate.y);;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">gl_Position</span> = position;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p>方法五：直接修改顶点坐标 对应对纹理坐标</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">GLfloat attrArr[] =</span><br><span class="line">        &#123;</span><br><span class="line">        <span class="number">0.5</span>f, -<span class="number">0.5</span>f, <span class="number">0.0</span>f,        <span class="number">1.0</span>f, <span class="number">1.0</span>f, <span class="regexp">//</span>右下</span><br><span class="line">        -<span class="number">0.5</span>f, <span class="number">0.5</span>f, <span class="number">0.0</span>f,        <span class="number">0.0</span>f, <span class="number">0.0</span>f, <span class="regexp">//</span> 左上</span><br><span class="line">        -<span class="number">0.5</span>f, -<span class="number">0.5</span>f, <span class="number">0.0</span>f,       <span class="number">0.0</span>f, <span class="number">1.0</span>f, <span class="regexp">//</span> 左下</span><br><span class="line">        <span class="number">0.5</span>f, <span class="number">0.5</span>f, <span class="number">0.0</span>f,         <span class="number">1.0</span>f, <span class="number">0.0</span>f, <span class="regexp">//</span> 右上</span><br><span class="line">        -<span class="number">0.5</span>f, <span class="number">0.5</span>f, <span class="number">0.0</span>f,        <span class="number">0.0</span>f, <span class="number">0.0</span>f, <span class="regexp">//</span> 左上</span><br><span class="line">        <span class="number">0.5</span>f, -<span class="number">0.5</span>f, <span class="number">0.0</span>f,        <span class="number">1.0</span>f, <span class="number">1.0</span>f, <span class="regexp">//</span> 右下</span><br><span class="line">        &#125;;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>推荐使用 方法二</p>
+</blockquote>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Leisure</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://ugpass.github.io/2020/08/02/2020-08-02-%E7%BF%BB%E8%BD%AC%E7%BA%B9%E7%90%86%E7%9A%845%E7%A7%8D%E6%96%B9%E5%BC%8F/">http://ugpass.github.io/2020/08/02/2020-08-02-%E7%BF%BB%E8%BD%AC%E7%BA%B9%E7%90%86%E7%9A%845%E7%A7%8D%E6%96%B9%E5%BC%8F/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/OpenGL-ES/"># OpenGL ES</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/08/02/2020-08-02-OpenGL%20ES%20GLSL%E5%8A%A0%E8%BD%BD%E7%BA%B9%E7%90%86/">OpenGL ES GLSL加载纹理</a>
+            
+            
+            <a class="next" rel="next" href="/2020/07/28/2020-07-28-OpenGL%20ES&GLKit%E5%8A%A0%E8%BD%BD%E7%BA%B9%E7%90%86/">OpenGL ES&GLKit加载纹理</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Leisure | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

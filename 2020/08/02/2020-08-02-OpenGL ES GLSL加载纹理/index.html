@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Leisure">
+
+
+
+    <meta name="description" content="悄悄的-开心😄">
+
+
+    <meta name="keywords" content="Leisure leisure iOS iPhone">
+
+
+<title>OpenGL ES GLSL加载纹理 | Leisure</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Leisure&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Leisure&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">OpenGL ES GLSL加载纹理</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Leisure</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">八月 2, 2020&nbsp;&nbsp;0:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/OpenGL-ES/">OpenGL ES</a>
+                            
+                                <a href="/categories/OpenGL-ES/GLSL/">GLSL</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>使用GLSL语言加载纹理，需要自定义顶点着色器和片源着色器。</p>
+<p>GLSL编写的顶点着色器和片元着色器其实是一段代码，也是一段字符串，所以文件名和后缀可以自定义。</p>
+<p>通过创建<code>Empty</code>文件，修改文件名为<code>shaderv.vsh</code> 和  <code>shaderf.fsh</code>，分别代表顶点着色器和片元着色器。在GLSL语言编写的文件中，建议不要写中文注释，否则可能发生一些奇怪的错误。</p>
+<p><code>顶点着色器 shaderv.vsh</code>代码</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">attribute</span> <span class="type">vec4</span> position;</span><br><span class="line"><span class="keyword">attribute</span> <span class="type">vec2</span> textCoordinate;</span><br><span class="line"><span class="keyword">varying</span> <span class="keyword">lowp</span> <span class="type">vec2</span> varyTextCoord;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main() &#123;</span><br><span class="line">    varyTextCoord = textCoordinate;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">gl_Position</span> = position;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p> 解释：<br> attribute vec4 position; 指的是attribute属性的 4维向量 的顶点坐标。<br> attribute vec2 textCoordinate; 指的是attribute属性的 2维向量 的纹理坐标。<br> varying lowp vec2 varyTextCoord; 指的是通过顶点着色器透传到片元着色器中的 低精度 的 2维向量 的纹理坐标。<br> <code>varying</code>修饰符代表可以通过顶点着色器传参到片元着色器，在片元着色器中的接收变量 声明 需要和顶点着色器中 <strong>一模一样</strong>。<br> 每一个着色器文件都有一个<code>main</code>函数。<br>  varyTextCoord = textCoordinate; 将纹理坐标通过<code>varyTextCoord</code>变量传递到片元着色器。<br> gl_Position = position; 不对顶点坐标做任何处理，直接传入给OpenGL ES中的内建变量<code>gl_Position</code>。</p>
+</blockquote>
+<p><code>片元着色器 shaderf.fsh</code>代码</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">precision</span> <span class="keyword">highp</span> <span class="type">float</span>;</span><br><span class="line"><span class="keyword">varying</span> <span class="keyword">lowp</span> <span class="type">vec2</span> varyTextCoord;</span><br><span class="line"><span class="keyword">uniform</span> <span class="type">sampler2D</span> colorMap;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main() &#123;</span><br><span class="line">    <span class="keyword">lowp</span> <span class="type">vec4</span> temp = <span class="built_in">texture2D</span>(colorMap, varyTextCoord);</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">gl_FragColor</span> = temp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>解释：<br>precision highp float; 在本文件中使用高精度的 <code>float</code>。<br>varying lowp vec2 varyTextCoord; 声明和顶点着色器中一致，用来接收纹理坐标。<br>uniform sampler2D colorMap;  纹理采样器<br>texture2D(colorMap, varyTextCoord); 通过纹理采样器，获取纹理每个像素点对应的颜色值，赋值给OpenGL ES中的内建变量<code>gl_FragColor</code>。</p>
+</blockquote>
+<p>使用GLSL编写自定义着色器加载纹理需要以下步骤：</p>
+<ul>
+<li>创建图层</li>
+<li>创建上下文</li>
+<li>清空缓冲区</li>
+<li>设置renderBuffer</li>
+<li>设置frameBuffer</li>
+<li>开始绘制</li>
+</ul>
+<blockquote>
+<p>以下代码在自定义CustomView继承自UIView中编写。</p>
+</blockquote>
+<p><strong>0.定义属性</strong></p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">@interface</span> CustomView()</span><br><span class="line"></span><br><span class="line"><span class="variable">@property</span> (nonatomic, strong) CAEAGLLayer *eaglLayer;<span class="comment">//自定义图层</span></span><br><span class="line"></span><br><span class="line"><span class="variable">@property</span> (nonatomic, strong) EAGLContext *context;<span class="comment">//上下文</span></span><br><span class="line"></span><br><span class="line"><span class="variable">@property</span> (nonatomic, assign) GLuint renderBuffer;<span class="comment">//渲染缓冲区ID</span></span><br><span class="line"><span class="variable">@property</span> (nonatomic, assign) GLuint frameBuffer;<span class="comment">//帧缓冲区ID</span></span><br><span class="line"></span><br><span class="line"><span class="variable">@property</span> (nonatomic, assign) GLuint program;<span class="comment">//程序ID</span></span><br><span class="line"></span><br><span class="line"><span class="variable">@end</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>1.创建图层</strong></p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//1.设置图层</span></span><br><span class="line">- (<span class="keyword">void</span>)setupLayer &#123;</span><br><span class="line">    <span class="keyword">self</span>.eaglLayer = (<span class="built_in">CAEAGLLayer</span> *)<span class="keyword">self</span>.layer;</span><br><span class="line">    </span><br><span class="line">    [<span class="keyword">self</span> setContentScaleFactor:[<span class="built_in">UIScreen</span> mainScreen].scale];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     kEAGLDrawablePropertyColorFormat:颜色缓冲区格式</span></span><br><span class="line"><span class="comment">     kEAGLDrawablePropertyRetainedBacking:绘制后是否保留其内容</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">self</span>.eaglLayer.drawableProperties = [<span class="built_in">NSDictionary</span> dictionaryWithObjectsAndKeys:@false, kEAGLDrawablePropertyRetainedBacking, kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, <span class="literal">nil</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>需要重写<code>+ (Class)layerClass;</code>方法才能强转生效。</p>
+<figure class="highlight monkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="class"><span class="keyword">Class</span>)<span class="title">layerClass</span> &#123;</span></span><br><span class="line">    <span class="keyword">return</span> [CAEAGLLayer <span class="class"><span class="keyword">class</span>];</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>2.创建上下文</strong></p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//2.设置上下文</span></span><br><span class="line">- (<span class="keyword">void</span>)setupContext &#123;</span><br><span class="line">    <span class="keyword">self</span>.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];</span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">self</span>.context) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;create context failed&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">BOOL</span> ret = [EAGLContext setCurrentContext:<span class="keyword">self</span>.context];</span><br><span class="line">    <span class="keyword">if</span> (!ret) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;setCurrentContext failed&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>3.清空缓冲区</strong></p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//3.清空缓冲区</span></span><br><span class="line">- (void)clearRenderAndFrameBuffer &#123;</span><br><span class="line">    <span class="comment">//Frame Buffer Object FBO</span></span><br><span class="line">    <span class="comment">//Render Buffer 三类：颜色缓冲区、深度缓冲区、模版缓冲区</span></span><br><span class="line">    </span><br><span class="line">    gl<span class="constructor">DeleteRenderbuffers(1, &amp;<span class="params">_renderBuffer</span>)</span>;</span><br><span class="line">    self.renderBuffer = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    gl<span class="constructor">DeleteFramebuffers(1, &amp;<span class="params">_frameBuffer</span>)</span>;</span><br><span class="line">    self.frameBuffer = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>4.设置renderBuffer</strong></p>
+<figure class="highlight lasso"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//4.设置renderBuffer </span></span><br><span class="line">-(<span class="literal">void</span>)setupRenderBuffer</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//定义一个缓存区ID</span></span><br><span class="line">    GLuint renderBuffer;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//申请一个缓存区标志</span></span><br><span class="line">    glGenRenderbuffers(<span class="number">1</span>, &amp;renderBuffer); </span><br><span class="line">    <span class="built_in">self</span>.renderBuffer = renderBuffer;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//将标识符绑定到GL_RENDERBUFFER</span></span><br><span class="line">    glBindRenderbuffer(GL_RENDERBUFFER, <span class="built_in">self</span>.renderBuffer);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//将可绘制对象drawable object&#x27;s  CAEAGLLayer的存储绑定到OpenGL ES renderBuffer对象</span></span><br><span class="line">    <span class="meta">[</span><span class="built_in">self</span>.context renderbufferStorage:GL_RENDERBUFFER fromDrawable:<span class="built_in">self</span>.eaglLayer<span class="meta">]</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>5.设置frameBuffer</strong></p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//5.设置frameBuffer</span></span><br><span class="line">- (void)setupFrameBuffer &#123;</span><br><span class="line">    GLuint frameBuffer;</span><br><span class="line">    </span><br><span class="line">    gl<span class="constructor">GenFramebuffers(1, &amp;<span class="params">frameBuffer</span>)</span>;</span><br><span class="line">    </span><br><span class="line">    self.frameBuffer = frameBuffer;</span><br><span class="line">    </span><br><span class="line">    gl<span class="constructor">BindFramebuffer(GL_FRAMEBUFFER, <span class="params">self</span>.<span class="params">frameBuffer</span>)</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/*生成帧缓存区之后，则需要将renderbuffer跟framebuffer进行绑定，</span></span><br><span class="line"><span class="comment">     调用glFramebufferRenderbuffer函数进行绑定到对应的附着点上，后面的绘制才能起作用</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="comment">//将渲染缓存区frameBuffer 通过glFramebufferRenderbuffer函数绑定到 GL_COLOR_ATTACHMENT0上。</span></span><br><span class="line">    gl<span class="constructor">FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, <span class="params">self</span>.<span class="params">renderBuffer</span>)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>6.开始绘制</strong></p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//6.开始绘制</span></span><br><span class="line">- (void)renderLayer &#123;</span><br><span class="line">    <span class="comment">//设置背景色</span></span><br><span class="line">    gl<span class="constructor">ClearColor(0.45, 0.5, 0, 1)</span>;</span><br><span class="line">    <span class="comment">//清空颜色缓冲区</span></span><br><span class="line">    gl<span class="constructor">Clear(GL_COLOR_BUFFER_BIT)</span>;</span><br><span class="line">    </span><br><span class="line">    CGFloat scale = <span class="literal">[UIS<span class="identifier">creen</span> <span class="identifier">mainScreen</span>]</span>.scale;</span><br><span class="line">    <span class="comment">//设置视口</span></span><br><span class="line">    gl<span class="constructor">Viewport(<span class="params">self</span>.<span class="params">frame</span>.<span class="params">origin</span>.<span class="params">x</span> <span class="operator">*</span> <span class="params">scale</span>, <span class="params">self</span>.<span class="params">frame</span>.<span class="params">origin</span>.<span class="params">y</span> <span class="operator">*</span> <span class="params">scale</span>, <span class="params">self</span>.<span class="params">frame</span>.<span class="params">size</span>.<span class="params">width</span> <span class="operator">*</span> <span class="params">scale</span>, <span class="params">self</span>.<span class="params">frame</span>.<span class="params">size</span>.<span class="params">height</span> <span class="operator">*</span> <span class="params">scale</span>)</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//顶点着色器和片元着色器文件路径</span></span><br><span class="line">    NSString *vertFilePath = <span class="literal">[[NSB<span class="identifier">undle</span> <span class="identifier">mainBundle</span>]</span> pathForResource:@<span class="string">&quot;shaderv&quot;</span> ofType:@<span class="string">&quot;vsh&quot;</span>];</span><br><span class="line">    NSString *fragFilePath = <span class="literal">[[NSB<span class="identifier">undle</span> <span class="identifier">mainBundle</span>]</span> pathForResource:@<span class="string">&quot;shaderf&quot;</span> ofType:@<span class="string">&quot;fsh&quot;</span>];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//加载顶点着色器和纹理着色器 创建program</span></span><br><span class="line">    self.program = <span class="literal">[<span class="identifier">self</span> <span class="identifier">loaderShader</span>:<span class="identifier">vertFilePath</span> <span class="identifier">withFrag</span>:<span class="identifier">fragFilePath</span>]</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//链接program</span></span><br><span class="line">    gl<span class="constructor">LinkProgram(<span class="params">self</span>.<span class="params">program</span>)</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//获取program链接状态</span></span><br><span class="line">    GLint linkStatus;</span><br><span class="line">    gl<span class="constructor">GetProgramiv(<span class="params">self</span>.<span class="params">program</span>, GL_LINK_STATUS, &amp;<span class="params">linkStatus</span>)</span>;</span><br><span class="line">    <span class="keyword">if</span> (linkStatus<span class="operator"> == </span>GL_FALSE) &#123;</span><br><span class="line">        GLchar loginfo<span class="literal">[<span class="number">512</span>]</span>;</span><br><span class="line">        gl<span class="constructor">GetProgramInfoLog(<span class="params">self</span>.<span class="params">program</span>, <span class="params">sizeof</span>(<span class="params">loginfo</span>)</span>, <span class="number">0</span>, &amp;loginfo<span class="literal">[<span class="number">0</span>]</span>);</span><br><span class="line">        NSString *message = <span class="literal">[NSS<span class="identifier">tring</span> <span class="identifier">stringWithUTF8String</span>:<span class="identifier">loginfo</span>]</span>;</span><br><span class="line">        <span class="constructor">NSLog(@<span class="string">&quot;program link error:%@&quot;</span>, <span class="params">message</span>)</span>;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//使用program</span></span><br><span class="line">    gl<span class="constructor">UseProgram(<span class="params">self</span>.<span class="params">program</span>)</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//准备顶点数据/纹理坐标</span></span><br><span class="line">    GLfloat attrArr<span class="literal">[]</span> =</span><br><span class="line">     &#123;</span><br><span class="line">         <span class="number">0.5</span>f, -<span class="number">0.5</span>f, -<span class="number">1.0</span>f,     <span class="number">1.0</span>f, <span class="number">0.0</span>f,</span><br><span class="line">         -<span class="number">0.5</span>f, <span class="number">0.5</span>f, -<span class="number">1.0</span>f,     <span class="number">0.0</span>f, <span class="number">1.0</span>f,</span><br><span class="line">         -<span class="number">0.5</span>f, -<span class="number">0.5</span>f, -<span class="number">1.0</span>f,    <span class="number">0.0</span>f, <span class="number">0.0</span>f,</span><br><span class="line">         </span><br><span class="line">         <span class="number">0.5</span>f, <span class="number">0.5</span>f, -<span class="number">1.0</span>f,      <span class="number">1.0</span>f, <span class="number">1.0</span>f,</span><br><span class="line">         -<span class="number">0.5</span>f, <span class="number">0.5</span>f, -<span class="number">1.0</span>f,     <span class="number">0.0</span>f, <span class="number">1.0</span>f,</span><br><span class="line">         <span class="number">0.5</span>f, -<span class="number">0.5</span>f, -<span class="number">1.0</span>f,     <span class="number">1.0</span>f, <span class="number">0.0</span>f,</span><br><span class="line">     &#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//将顶点坐标和纹理坐标拷贝到GPU中</span></span><br><span class="line">    GLuint attrBuffer;</span><br><span class="line">    gl<span class="constructor">GenBuffers(1, &amp;<span class="params">attrBuffer</span>)</span>;</span><br><span class="line">    gl<span class="constructor">BindBuffer(GL_ARRAY_BUFFER, <span class="params">attrBuffer</span>)</span>;</span><br><span class="line">    gl<span class="constructor">BufferData(GL_ARRAY_BUFFER, <span class="params">sizeof</span>(<span class="params">attrArr</span>)</span>, attrArr, GL_DYNAMIC_DRAW);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//获取顶点数据通道ID v.sh positon 打开顶点通道 并设置数据读取方式</span></span><br><span class="line">    GLuint position = gl<span class="constructor">GetAttribLocation(<span class="params">self</span>.<span class="params">program</span>, <span class="string">&quot;position&quot;</span>)</span>;</span><br><span class="line">    gl<span class="constructor">EnableVertexAttribArray(<span class="params">position</span>)</span>;</span><br><span class="line">    gl<span class="constructor">VertexAttribPointer(<span class="params">position</span>, 3, GL_FLOAT, GL_FALSE, <span class="params">sizeof</span>(GLfloat)</span><span class="operator"> * </span><span class="number">5</span>, (GLfloat *)NULL + <span class="number">0</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//打开纹理通道 并设置数据读取方式</span></span><br><span class="line">    GLuint textCoordinate = gl<span class="constructor">GetAttribLocation(<span class="params">self</span>.<span class="params">program</span>, <span class="string">&quot;textCoordinate&quot;</span>)</span>;</span><br><span class="line">    gl<span class="constructor">EnableVertexAttribArray(<span class="params">textCoordinate</span>)</span>;</span><br><span class="line">    gl<span class="constructor">VertexAttribPointer(<span class="params">textCoordinate</span>, 2, GL_FLOAT, GL_FALSE, <span class="params">sizeof</span>(GLfloat)</span><span class="operator"> * </span><span class="number">5</span>, (GLfloat *)NULL + <span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//加载纹理</span></span><br><span class="line">    <span class="literal">[<span class="identifier">self</span> <span class="identifier">setupTexture</span>:@&quot;<span class="identifier">mew_progressive</span>.<span class="identifier">jpg</span>&quot;]</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//设置纹理采样器</span></span><br><span class="line">    gl<span class="constructor">Uniform1i(<span class="params">glGetUniformLocation</span>(<span class="params">self</span>.<span class="params">program</span>, <span class="string">&quot;colorMap&quot;</span>)</span>, <span class="number">0</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//开始绘制</span></span><br><span class="line">    gl<span class="constructor">DrawArrays(GL_TRIANGLES, 0, 6)</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//从渲染缓冲区显示到屏幕上</span></span><br><span class="line">    <span class="literal">[<span class="identifier">self</span>.<span class="identifier">context</span> <span class="identifier">presentRenderbuffer</span>:GL<span class="identifier">_RENDERBUFFER</span>]</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>加载纹理</strong></p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//加载纹理</span></span><br><span class="line">- (GLuint)setupTexture:(NSString *)filePath &#123;</span><br><span class="line">    <span class="comment">//获取图像CGImage</span></span><br><span class="line">    CGImageRef cgImage = [UIImage imageNamed:filePath].CGImage;</span><br><span class="line">    <span class="keyword">if</span> (!cgImage) &#123;</span><br><span class="line">        NSLog(@<span class="string">&quot;faile to load image&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//获取图片宽高</span></span><br><span class="line">    <span class="keyword">size_t</span> <span class="built_in">width</span> = CGImageGetWidth(cgImage);</span><br><span class="line">    <span class="keyword">size_t</span> <span class="built_in">height</span> = CGImageGetHeight(cgImage);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//获取图片字节数 宽*高*4（RGBA）</span></span><br><span class="line">    GLubyte *data = (GLubyte *)<span class="built_in">calloc</span>(<span class="built_in">width</span> * <span class="built_in">height</span> * <span class="number">4</span>, <span class="keyword">sizeof</span>(GLubyte));</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//创建上下文</span></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     参数1：data,指向要渲染的绘制图像的内存地址</span></span><br><span class="line"><span class="comment">     参数2：width,bitmap的宽度，单位为像素</span></span><br><span class="line"><span class="comment">     参数3：height,bitmap的高度，单位为像素</span></span><br><span class="line"><span class="comment">     参数4：bitPerComponent,内存中像素的每个组件的位数，比如32位RGBA，就设置为8</span></span><br><span class="line"><span class="comment">     参数5：bytesPerRow,bitmap的没一行的内存所占的比特数</span></span><br><span class="line"><span class="comment">     参数6：colorSpace,bitmap上使用的颜色空间  kCGImageAlphaPremultipliedLast：RGBA</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    CGContextRef cgContext = CGBitmapContextCreate(</span><br><span class="line">                                                   data,</span><br><span class="line">                                                   <span class="built_in">width</span>,</span><br><span class="line">                                                   <span class="built_in">height</span>,</span><br><span class="line">                                                   <span class="number">8</span>,</span><br><span class="line">                                                   <span class="built_in">width</span> * <span class="number">4</span>,</span><br><span class="line">                                                   CGImageGetColorSpace(cgImage),</span><br><span class="line">                                                   kCGImageAlphaPremultipliedLast);</span><br><span class="line">    <span class="comment">//使用CGContextRef 将图片绘制出来 也是一个解码的过程</span></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     CGContextDrawImage 使用的是Core Graphics框架，坐标系与UIKit 不一样。UIKit框架的原点在屏幕的左上角，Core Graphics框架的原点在屏幕的左下角。</span></span><br><span class="line"><span class="comment">     CGContextDrawImage</span></span><br><span class="line"><span class="comment">     参数1：绘图上下文</span></span><br><span class="line"><span class="comment">     参数2：rect坐标</span></span><br><span class="line"><span class="comment">     参数3：绘制的图片</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    CGRect <span class="built_in">rect</span> = CGRectMake(<span class="number">0</span>, <span class="number">0</span>, <span class="built_in">width</span>, <span class="built_in">height</span>);</span><br><span class="line">    </span><br><span class="line">    CGContextDrawImage(cgContext, <span class="built_in">rect</span>, cgImage);</span><br><span class="line">    </span><br><span class="line">    CGContextRelease(cgContext);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//纹理 当只有一个纹理时 纹理ID为0, 多个纹理需要激活</span></span><br><span class="line">    GLuint textureID;</span><br><span class="line">    glGenTextures(<span class="number">1</span>, &amp;textureID);</span><br><span class="line">    </span><br><span class="line">    glBindTexture(GL_TEXTURE_2D, textureID);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//设置纹理属性</span></span><br><span class="line">    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);</span><br><span class="line">    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);</span><br><span class="line">    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);</span><br><span class="line">    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">float</span> fw = <span class="built_in">width</span>, fh = <span class="built_in">height</span>;</span><br><span class="line">    <span class="comment">//载入纹理2D数据</span></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     参数1：纹理模式，GL_TEXTURE_1D、GL_TEXTURE_2D、GL_TEXTURE_3D</span></span><br><span class="line"><span class="comment">     参数2：加载的层次，一般设置为0</span></span><br><span class="line"><span class="comment">     参数3：纹理的颜色值GL_RGBA</span></span><br><span class="line"><span class="comment">     参数4：宽</span></span><br><span class="line"><span class="comment">     参数5：高</span></span><br><span class="line"><span class="comment">     参数6：border，边界宽度</span></span><br><span class="line"><span class="comment">     参数7：format</span></span><br><span class="line"><span class="comment">     参数8：type</span></span><br><span class="line"><span class="comment">     参数9：纹理数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    glTexImage2D(GL_TEXTURE_2D, <span class="number">0</span>, GL_RGBA, fw, fh, <span class="number">0</span>, GL_RGBA, GL_UNSIGNED_BYTE, data);</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">free</span>(data);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>加载着色器</strong></p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//加载着色器</span></span><br><span class="line">- (GLuint)loaderShader:(NSString *)vert withFrag:(NSString *)frag &#123;</span><br><span class="line">    <span class="comment">//顶点着色器对象 片元着色器对象/句柄</span></span><br><span class="line">    GLuint verShader, fragShader;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//创建空的program</span></span><br><span class="line">    GLuint program = gl<span class="constructor">CreateProgram()</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//编译</span></span><br><span class="line">    <span class="literal">[<span class="identifier">self</span> <span class="identifier">compileShader</span>:&amp;<span class="identifier">verShader</span> <span class="identifier">type</span>:GL<span class="identifier">_VERTEX_SHADER</span> <span class="identifier">filePath</span>:<span class="identifier">vert</span>]</span>;</span><br><span class="line">    <span class="literal">[<span class="identifier">self</span> <span class="identifier">compileShader</span>:&amp;<span class="identifier">fragShader</span> <span class="identifier">type</span>:GL<span class="identifier">_FRAGMENT_SHADER</span> <span class="identifier">filePath</span>:<span class="identifier">frag</span>]</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//把shader附着 到编译好的程序</span></span><br><span class="line">    gl<span class="constructor">AttachShader(<span class="params">program</span>, <span class="params">verShader</span>)</span>;</span><br><span class="line">    gl<span class="constructor">AttachShader(<span class="params">program</span>, <span class="params">fragShader</span>)</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//附着之后 就可以删除</span></span><br><span class="line">    gl<span class="constructor">DeleteShader(<span class="params">verShader</span>)</span>;</span><br><span class="line">    gl<span class="constructor">DeleteShader(<span class="params">fragShader</span>)</span>;</span><br><span class="line">    </span><br><span class="line">    return program;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>编译program</strong></p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">//编译</span><br><span class="line">- (void)compileShader:(<span class="type">GLuint</span> *)shader <span class="keyword">type</span>:(<span class="type">GLenum</span>)<span class="keyword">type</span> filePath:(<span class="type">NSString</span> *)filePath &#123;</span><br><span class="line">    //读取路径</span><br><span class="line">    <span class="type">NSString</span> *content = [<span class="type">NSString</span> stringWithContentsOfFile:filePath encoding:<span class="type">NSUTF8StringEncoding</span> error:nil];</span><br><span class="line">    const <span class="type">GLchar</span> *source = [content <span class="type">UTF8String</span>];</span><br><span class="line">    </span><br><span class="line">    //创建对应类型的shader</span><br><span class="line">    *shader = glCreateShader(type);</span><br><span class="line">    </span><br><span class="line">    //将着色器附着到 着色器对象上</span><br><span class="line">    glShaderSource(*shader, 1, &amp;source, <span class="type">NULL</span>);</span><br><span class="line">    </span><br><span class="line">    //编译</span><br><span class="line">    glCompileShader(*shader);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>demo地址：<a href="%5Bhttps://github.com/ugpass/GLSL_Hello_World%5D(https://github.com/ugpass/GLSL_Hello_World)">GLSL加载图片</a></p>
+<blockquote>
+<p><code>glVertexAttribPointer</code>函数最后一个参数，从哪里开始访问数据的 <code>NULL</code>， 如果不加<code>(GLfloat *)</code>，将会导致纹理加载不上去！！！</p>
+</blockquote>
+<blockquote>
+<p>由于CoreGraphics坐标系与UIKit不一致，导致图片显示为倒的，之后介绍五种旋转图片的方法。</p>
+</blockquote>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Leisure</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://ugpass.github.io/2020/08/02/2020-08-02-OpenGL%20ES%20GLSL%E5%8A%A0%E8%BD%BD%E7%BA%B9%E7%90%86/">http://ugpass.github.io/2020/08/02/2020-08-02-OpenGL%20ES%20GLSL%E5%8A%A0%E8%BD%BD%E7%BA%B9%E7%90%86/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/OpenGL-ES/"># OpenGL ES</a>
+                    
+                        <a href="/tags/GLSL/"># GLSL</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/09/06/2020-09-06-iOS%20alloc%E5%8E%9F%E7%90%86/">iOS alloc原理分析</a>
+            
+            
+            <a class="next" rel="next" href="/2020/08/02/2020-08-02-%E7%BF%BB%E8%BD%AC%E7%BA%B9%E7%90%86%E7%9A%845%E7%A7%8D%E6%96%B9%E5%BC%8F/">翻转纹理的5种方式</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Leisure | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

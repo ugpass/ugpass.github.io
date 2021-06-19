@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Leisure">
+
+
+
+    <meta name="description" content="悄悄的-开心😄">
+
+
+    <meta name="keywords" content="Leisure leisure iOS iPhone">
+
+
+<title>React Native是如何工作的 | Leisure</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Leisure&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Leisure&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">React Native是如何工作的</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Leisure</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">三月 7, 2020&nbsp;&nbsp;22:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/React-Native/">React Native</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="React-Native是如何工作的？"><a href="#React-Native是如何工作的？" class="headerlink" title="React Native是如何工作的？"></a>React Native是如何工作的？</h2><h3 id="React-Native-App中的线程"><a href="#React-Native-App中的线程" class="headerlink" title="React Native App中的线程"></a>React Native App中的线程</h3><p>在React Native App中有4个线程：</p>
+<pre><code>1）UI线程：即主线程。它用于Android和iOS原生UI的渲染。比如在安卓上，关于UI的测量/布局/绘制就是在UI线程上。
+
+2）JS线程：JS线程或JavaScript线程是逻辑将会在其中运行。比如应用程序的JavaScript代码执行、API调用、触摸事件处理都是在这个线程中运行的。当JS线程中的每个事件循环结束时，对于UI的更新将被分批发送到native端进行更新。
+
+为了拥有更好的性能，JS线程应该能够在下一帧渲染前将更新内容传递给UI线程。比如iOS每秒钟渲染60帧，每一帧间隔为16.67ms。如果在JS线程中的事件循环内做了比较复杂的操作花费大于16.67ms，UI将会卡顿。
+
+有一个例外是，如果UI本来就在native端发生变化，则不会由于JS端阻塞而卡顿。
+
+3）Native Modules线程：有时候App需要访问native端的API，则会在Native Module线程中调用。
+
+4）渲染线程：仅在Android L (5.0)时，渲染线程用于生成OpenGL命令去绘制UI。
+</code></pre>
+<h3 id="在程序过程中React-Native是如何工作的"><a href="#在程序过程中React-Native是如何工作的" class="headerlink" title="在程序过程中React Native是如何工作的"></a>在程序过程中React Native是如何工作的</h3><pre><code>1）在程序启动时，在主线程中开始解析并加载`JS Bundle`
+
+2) 当JavaScript代码加载成功之后，主线程把JavaScript代码送到另一个JS线程，这样当JS代码在做一些繁重的计算任务导致阻塞一段时间也不会影响UI线程。
+
+3）当React开始渲染，Reconciler开始计算差异，同时会生成一个新的虚拟DOM(布局)，它把这些DOM上的变化传递给另一个Shadow Thread（为什么叫做“Shadow”，因为他会生成“Shadow Node”）。
+
+4）Shadow Thread计算布局然后把布局参数或布局对象传递给主线程。
+
+5）由于只有主线程才能在屏幕上进行渲染，所以Shadow Thread把生成好的布局传递给主线程，然后渲染UI。
+</code></pre>
+<h3 id="React-Native的组成"><a href="#React-Native的组成" class="headerlink" title="React Native的组成"></a>React Native的组成</h3><p>通常我们把React Native分成3部分：</p>
+<pre><code>1）React Native - 原生端即Native
+
+2）React Native - JS端
+
+3）React Native - 桥即bridge
+</code></pre>
+<p>翻译自<a target="_blank" rel="noopener" href="https://www.geeksforgeeks.org/react-native-works/">How React Native works?</a></p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Leisure</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://ugpass.github.io/2020/03/07/2020-03-07-React%20Native%E6%98%AF%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%E7%9A%84/">http://ugpass.github.io/2020/03/07/2020-03-07-React%20Native%E6%98%AF%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%E7%9A%84/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/React-Native/"># React Native</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/07/02/2020-07-02-OpenGL%E5%B8%B8%E8%A7%81%E4%B8%93%E4%B8%9A%E5%90%8D%E8%AF%8D/">OpenGL常见专业名词</a>
+            
+            
+            <a class="next" rel="next" href="/2019/09/05/2019-09-05-webrtc-%E8%A7%86%E9%A2%91%E9%87%87%E9%9B%86/">WebRTC的视频采集(一)</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Leisure | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

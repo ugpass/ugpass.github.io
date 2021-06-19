@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Leisure">
+
+
+
+    <meta name="description" content="悄悄的-开心😄">
+
+
+    <meta name="keywords" content="Leisure leisure iOS iPhone">
+
+
+<title>OpenGL纹理加载与镜像 | Leisure</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Leisure&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Leisure&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">OpenGL纹理加载与镜像</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Leisure</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">七月 22, 2020&nbsp;&nbsp;0:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/OpenGL/">OpenGL</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p><strong>OpenGL纹理加载步骤以及相关API</strong></p>
+<p>在准备工作<code>SetupRC</code>函数中</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//分配纹理ID textureID</span></span><br><span class="line">gl<span class="constructor">GenTextures(1, &amp;<span class="params">textureID</span>)</span>;</span><br><span class="line">    </span><br><span class="line"><span class="comment">//将生成的纹理ID绑定到对应的目标纹理上</span></span><br><span class="line"><span class="comment">//目标纹理只能是 GL_TEXTURE_1D或者GL_TEXTURE_2D</span></span><br><span class="line">gl<span class="constructor">BindTexture(GL_TEXTURE_2D, <span class="params">textureID</span>)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>在渲染函数中不同的纹理需要一一对应再次绑定。</p>
+<p>载入纹理：</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//将TGA加载为纹理</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> fileName:纹理文件路径</span></span><br><span class="line"><span class="comment"> minFilter:</span></span><br><span class="line"><span class="comment"> magFilter:</span></span><br><span class="line"><span class="comment"> warpMode:</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="built_in">bool</span> <span class="constructor">LoadTGATexture(<span class="params">const</span> <span class="params">char</span> <span class="operator">*</span><span class="params">fileName</span>, GLenum <span class="params">minFilter</span>, GLenum <span class="params">magFilter</span>, GLenum <span class="params">wrapMode</span>)</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//指向图像数据的指针</span></span><br><span class="line">    GLbyte *pBits;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//纹理宽、高、组件</span></span><br><span class="line">    <span class="built_in">int</span> nWidth, nHeight, nComponent;</span><br><span class="line">    <span class="comment">//纹理格式 tga文件打印出来10进制为6407 对应的16进制为0x1907</span></span><br><span class="line">    <span class="comment">//在glew.h中对应的宏为 #define GL_RGB 0x1907</span></span><br><span class="line">    GLenum eFormat;</span><br><span class="line">    </span><br><span class="line">    pBits = glt<span class="constructor">ReadTGABits(<span class="params">fileName</span>, &amp;<span class="params">nWidth</span>, &amp;<span class="params">nHeight</span>, &amp;<span class="params">nComponent</span>, &amp;<span class="params">eFormat</span>)</span>;</span><br><span class="line">    <span class="keyword">if</span> (pBits<span class="operator"> == </span>NULL) &#123;</span><br><span class="line">        return <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//设置纹理参数</span></span><br><span class="line">    <span class="comment">//wrapMode环绕模式 这里设置为 GL_CLAMP_TO_EDGE</span></span><br><span class="line">    <span class="comment">//x y z 对应 GL_TEXTURE_WRAP_S GL_TEXTURE_WRAP_T GL_TEXTURE_WRAP_R</span></span><br><span class="line">    gl<span class="constructor">TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, <span class="params">wrapMode</span>)</span>;</span><br><span class="line">    gl<span class="constructor">TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, <span class="params">wrapMode</span>)</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//设置过滤方式</span></span><br><span class="line">    <span class="comment">//GL_TEXTURE_MIN_FILTER 和 GL_TEXTURE_MAG_FILTER 为缩小/放大过滤方式</span></span><br><span class="line">    <span class="comment">//过滤方式常用：GL_NEAREST GL_LINEAR  临近过滤 和 线性过滤</span></span><br><span class="line">    gl<span class="constructor">TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, <span class="params">minFilter</span>)</span>;</span><br><span class="line">    gl<span class="constructor">TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, <span class="params">magFilter</span>)</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//载入纹理</span></span><br><span class="line">    <span class="comment">//参数1:纹理维度</span></span><br><span class="line">    <span class="comment">//参数2:level mip贴图层次</span></span><br><span class="line">    <span class="comment">//参数3:纹理内部格式 接受：GL_ALPHA，GL_LUMINANCE，GL_LUMINANCE_ALPHA，GL_RGB，GL_RGBA</span></span><br><span class="line">    <span class="comment">//参数4:宽度</span></span><br><span class="line">    <span class="comment">//参数5:高度</span></span><br><span class="line">    <span class="comment">//参数6:指定边框宽度 必须为0</span></span><br><span class="line">    <span class="comment">//参数7:格式 接受 GL_ALPHA，GL_RGB，GL_RGBA，GL_LUMINANCE，和GL_LUMINANCE_ALPHA</span></span><br><span class="line">    <span class="comment">//参数8:纹理数据类型 接受 GL_UNSIGNED_BYTE，GL_UNSIGNED_SHORT_5_6_5，GL_UNSIGNED_SHORT_4_4_4_4，和GL_UNSIGNED_SHORT_5_5_5_1</span></span><br><span class="line">    <span class="comment">//参数9:指向纹理数据的指针</span></span><br><span class="line">    gl<span class="constructor">TexImage2D(GL_TEXTURE_2D, 0, <span class="params">nComponent</span>, <span class="params">nWidth</span>, <span class="params">nHeight</span>, 0, <span class="params">eFormat</span>, GL_UNSIGNED_BYTE, <span class="params">pBits</span>)</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//释放指针</span></span><br><span class="line">    free(pBits);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//只有minFilter 等于以下四种模式，才可以生成Mip贴图</span></span><br><span class="line">    <span class="comment">//GL_NEAREST_MIPMAP_NEAREST具有非常好的性能，并且闪烁现象非常弱</span></span><br><span class="line">    <span class="comment">//GL_LINEAR_MIPMAP_NEAREST常常用于对游戏进行加速，它使用了高质量的线性过滤器</span></span><br><span class="line">    <span class="comment">//GL_LINEAR_MIPMAP_LINEAR 和GL_NEAREST_MIPMAP_LINEAR 过滤器在Mip层之间执行了一些额外的插值，以消除他们之间的过滤痕迹。</span></span><br><span class="line">    <span class="comment">//GL_LINEAR_MIPMAP_LINEAR 三线性Mip贴图。纹理过滤的黄金准则，具有最高的精度。</span></span><br><span class="line">    <span class="keyword">if</span>(minFilter<span class="operator"> == </span>GL_LINEAR_MIPMAP_LINEAR <span class="pattern-match"><span class="operator">||</span></span></span><br><span class="line"><span class="pattern-match">       min<span class="constructor">Filter</span> <span class="operator">==</span> <span class="constructor">GL_LINEAR_MIPMAP_NEAREST</span> <span class="operator">||</span></span></span><br><span class="line"><span class="pattern-match">       min<span class="constructor">Filter</span> <span class="operator">==</span> <span class="constructor">GL_NEAREST_MIPMAP_LINEAR</span> <span class="operator">||</span></span></span><br><span class="line"><span class="pattern-match">       min<span class="constructor">Filter</span> <span class="operator">==</span> <span class="constructor">GL_NEAREST_MIPMAP_NEAREST</span>)</span></span><br><span class="line"><span class="pattern-match">    <span class="operator">/</span><span class="operator">/</span>4.纹理生成所有的<span class="constructor">Mip</span>层</span></span><br><span class="line"><span class="pattern-match">    <span class="operator">/</span><span class="operator">/</span>参数：<span class="constructor">GL_TEXTURE_1D</span>、<span class="constructor">GL_TEXTURE_2D</span>、<span class="constructor">GL_TEXTURE_3D</span></span></span><br><span class="line"><span class="pattern-match">    gl<span class="constructor">GenerateMipmap(GL_TEXTURE_2D)</span>;</span></span><br><span class="line"><span class="pattern-match">    </span></span><br><span class="line"><span class="pattern-match">    return <span class="literal">true</span>;</span></span><br><span class="line"><span class="pattern-match">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>记得在程序退出或者不再使用时，移除纹理ID</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">glDeleteTextures(<span class="number">1</span>, <span class="symbol">&amp;textureID</span>)<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>镜像</strong><br>效果</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1395687-af3c8a02f8d20ba5.gif?imageMogr2/auto-orient/strip" alt="qiu.gif"></p>
+<p>方案：<br>主要是通过模型视图矩阵调用缩放函数，如下是把y坐标镜像，则y为-1，其他为1</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">modelViewMatrix</span>.Scale(<span class="number">1</span>.<span class="number">0</span>f, -<span class="number">1</span>.<span class="number">0</span>f, <span class="number">1</span>.<span class="number">0</span>f);</span><br></pre></td></tr></table></figure>
+
+<p>为了使两个镜像的物体有间隔，沿y轴平移一定距离</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">modelViewMatrix</span>.Translate(<span class="number">0</span>.<span class="number">0</span>f, <span class="number">0</span>.<span class="number">8</span>f, <span class="number">0</span>.<span class="number">0</span>f);</span><br></pre></td></tr></table></figure>
+
+<p>然后画地板，为了更加生动形象，给地板设置一定透明度并开启混合。</p>
+<p><a href="%5Bhttps://github.com/ugpass/SphereWorld/tree/master%5D(https://github.com/ugpass/SphereWorld/tree/master)">demo</a> 使用<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/7f22654ab73c">OpenGL macOS环境搭建(本地Pod引入)</a> pod方式导入库</p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Leisure</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://ugpass.github.io/2020/07/22/2020-07-22-OpenGL%E7%BA%B9%E7%90%86%E5%8A%A0%E8%BD%BD%E4%B8%8E%E9%95%9C%E5%83%8F/">http://ugpass.github.io/2020/07/22/2020-07-22-OpenGL%E7%BA%B9%E7%90%86%E5%8A%A0%E8%BD%BD%E4%B8%8E%E9%95%9C%E5%83%8F/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/OpenGL/"># OpenGL</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/07/28/2020-07-28-OpenGL%20ES&GLKit%E5%8A%A0%E8%BD%BD%E7%BA%B9%E7%90%86/">OpenGL ES&GLKit加载纹理</a>
+            
+            
+            <a class="next" rel="next" href="/2020/07/21/2020-07-21-Cocoapods%E5%AE%89%E8%A3%85%E4%B8%8E%E6%9B%B4%E6%96%B0/">一、Cocoapods安装与更新</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Leisure | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

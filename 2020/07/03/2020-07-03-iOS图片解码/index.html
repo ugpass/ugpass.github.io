@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Leisure">
+
+
+
+    <meta name="description" content="悄悄的-开心😄">
+
+
+    <meta name="keywords" content="Leisure leisure iOS iPhone">
+
+
+<title>iOS图片解码 | Leisure</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Leisure&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Leisure&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">iOS图片解码</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Leisure</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">七月 3, 2020&nbsp;&nbsp;0:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/iOS/">iOS</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>参考<a href="%5Bhttp://lemon2well.top/2018/09/04/iOS%20%E5%BC%80%E5%8F%91/iOS%E5%9B%BE%E7%89%87%E8%A7%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/%5D(http://lemon2well.top/2018/09/04/iOS%20%E5%BC%80%E5%8F%91/iOS%E5%9B%BE%E7%89%87%E8%A7%A3%E7%A0%81%E5%AE%9E%E8%B7%B5/)">iOS图片解码实践</a> / <a href="%5Bhttps://blog.jamchenjun.com/2018/08/22/image-and-graphics-best-practices.html%5D(https://blog.jamchenjun.com/2018/08/22/image-and-graphics-best-practices.html)">iOS图像解码和最佳实践</a> / <a href="%5Bhttps://github.com/SDWebImage/SDWebImage%5D(https://github.com/SDWebImage/SDWebImage)">SDWebImage</a> /  <a href="%5Bhttps://github.com/ibireme/YYImage%5D(https://github.com/ibireme/YYImage)">YYImage</a></p>
+<h3 id="imageNamed-和-imageWithContentsOfFile的区别"><a href="#imageNamed-和-imageWithContentsOfFile的区别" class="headerlink" title="imageNamed 和  imageWithContentsOfFile的区别"></a><code>imageNamed</code> 和  <code>imageWithContentsOfFile</code>的区别</h3><h4 id="1、-UIImage-imageNamed-NSString-name"><a href="#1、-UIImage-imageNamed-NSString-name" class="headerlink" title="1、+ (UIImage *)imageNamed:(NSString *)name;"></a>1、<code>+ (UIImage *)imageNamed:(NSString *)name;</code></h4><p><code>name</code>：图片资源或文件的名称。对于assets中的资源，是指定的图片资源名称，图片资源中可以包含1x、2x、3x图片，系统会自动选择。对于png图像可以省略扩展名，对于其他格式图片需要始终包含文件扩展名。</p>
+<p>当在assets目录中查找时，查找<code>symbol image</code>优先于同名当<code>bitmap image</code>。由于<code>symbol image</code>仅支持iOS13及之后版本，所以可能需要在assets中包含两套图片格式，系统会在早期iOS版本自动选择<code>bitmap image</code>，不过我觉得一般没人这么干吧~。不能使用这个方法加载系统的<code>symbol image</code>,需要使用<code>systemImageNamed:</code>方法。</p>
+<p>这个方法会根据指定的名称在系统缓存中查找，选择最适合屏幕的image返回。如果系统缓存中没有找到，则从asstes目录或磁盘中找到正确的图片创建一个image返回。系统会随时清空图片缓存，当然仅仅是清空未使用的图片缓存。</p>
+<p>这个方法在iOS9之后是线程安全的。</p>
+<p>Tip:</p>
+<blockquote>
+<p>如果仅加载一次图片或者不想要添加到系统缓存中，可以使用<code>imageWithContentsOfFile</code>方法创建image。保证使用次数少的图片不添加到系统缓存中，可以有效提高App内存使用效率。</p>
+</blockquote>
+<h4 id="2、-UIImage-imageWithContentsOfFile-NSString-path"><a href="#2、-UIImage-imageWithContentsOfFile-NSString-path" class="headerlink" title="2、+ (UIImage *)imageWithContentsOfFile:(NSString *)path;"></a>2、<code>+ (UIImage *)imageWithContentsOfFile:(NSString *)path;</code></h4><p>这个方法不会缓存image对象。而且只会根据文件名获取，并不会根据2x、3x自动创建。</p>
+<h3 id="图片解压缩"><a href="#图片解压缩" class="headerlink" title="图片解压缩"></a>图片解压缩</h3><blockquote>
+<p>由于png、jpeg等图片格式均是压缩的位图图片，在显示时需要解码成位图。png是无损压缩且支持alpha通道，jpeg是有损压缩。</p>
+</blockquote>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UIImageView</span> *imgV = [[<span class="built_in">UIImageView</span> alloc] initWithFrame:<span class="keyword">self</span>.view.bounds];</span><br><span class="line"><span class="built_in">UIImage</span> *image = [<span class="built_in">UIImage</span> imageNamed:<span class="string">@&quot;test.jpeg&quot;</span>];</span><br><span class="line">[<span class="keyword">self</span>.view addSubview:imgV];</span><br></pre></td></tr></table></figure>
+<p>上述代码第一次加载时做了如下操作：</p>
+<ul>
+<li>从磁盘加载test.jpeg图片到内存中为 <code>Data Buffer</code></li>
+<li>当图片真正要被显示在屏幕上时，会触发解码，<code>Data Buffer</code> —&gt; <code>Image Buffer</code></li>
+<li>然后<code>Image Buffer</code>传递给GPU,GPU经过顶点坐标转换、顶点着色器、光栅化、片元着色器等步骤转化为<code>Frame Buffer</code>存在帧缓冲区，等待屏幕刷新显示</li>
+</ul>
+<p>下面代码通过<code>CGBitmapContextCreateImage</code>从图形上下文中获取到解码到位图。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="keyword">void</span>)decodeSourceImage:(<span class="built_in">UIImage</span> *)sourceImage completion:(<span class="keyword">nonnull</span> <span class="keyword">void</span> (^)(<span class="built_in">UIImage</span> * _Nonnull))completion &#123;</span><br><span class="line">    <span class="keyword">if</span> (!sourceImage) <span class="keyword">return</span>;</span><br><span class="line">    <span class="built_in">dispatch_async</span>(dispatch_get_global_queue(<span class="number">0</span>, <span class="number">0</span>), ^&#123;</span><br><span class="line">        <span class="comment">//获取图片宽高</span></span><br><span class="line">        <span class="built_in">CGImageRef</span> cgimage = sourceImage.CGImage;</span><br><span class="line">        size_t width = <span class="built_in">CGImageGetWidth</span>(cgimage);</span><br><span class="line">        size_t height = <span class="built_in">CGImageGetHeight</span>(cgimage);</span><br><span class="line">        <span class="keyword">if</span> (width == <span class="number">0</span> || height == <span class="number">0</span>) <span class="keyword">return</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//判断是否有alpha通道</span></span><br><span class="line">        <span class="built_in">CGImageAlphaInfo</span> alphaInfo = <span class="built_in">CGImageGetAlphaInfo</span>(cgimage) &amp; kCGBitmapAlphaInfoMask;</span><br><span class="line">        <span class="built_in">BOOL</span> hasAlpha = !(alphaInfo == kCGImageAlphaNone ||</span><br><span class="line">                          alphaInfo == kCGImageAlphaNoneSkipFirst ||</span><br><span class="line">                          alphaInfo == kCGImageAlphaNoneSkipLast);</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">CGBitmapInfo</span> bitmapInfo = kCGBitmapByteOrder32Host;</span><br><span class="line">        bitmapInfo |= hasAlpha ? kCGImageAlphaPremultipliedFirst : kCGImageAlphaNoneSkipFirst;</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">CGColorSpaceRef</span> colorSpace = <span class="built_in">CGColorSpaceCreateDeviceRGB</span>();</span><br><span class="line">        <span class="comment">//创建图形上下文</span></span><br><span class="line">        <span class="built_in">CGContextRef</span> context = <span class="built_in">CGBitmapContextCreate</span>(<span class="literal">NULL</span>, width, height, <span class="number">8</span>, <span class="number">0</span>, colorSpace, bitmapInfo);</span><br><span class="line">        <span class="keyword">if</span> (!context) <span class="keyword">return</span>;</span><br><span class="line">        <span class="comment">//绘制到上下文中解压</span></span><br><span class="line">        <span class="built_in">CGContextDrawImage</span>(context, <span class="built_in">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, width, height), cgimage); <span class="comment">// decode</span></span><br><span class="line">        <span class="comment">//从上下文中获取</span></span><br><span class="line">        <span class="built_in">CGImageRef</span> newCgimage = <span class="built_in">CGBitmapContextCreateImage</span>(context);</span><br><span class="line">        <span class="built_in">UIImage</span> *desImage = [<span class="built_in">UIImage</span> imageWithCGImage:newCgimage];</span><br><span class="line">        <span class="built_in">CGContextRelease</span>(context);</span><br><span class="line">        <span class="built_in">dispatch_async</span>(dispatch_get_main_queue(), ^&#123;</span><br><span class="line">            <span class="keyword">if</span> (completion) &#123;</span><br><span class="line">                completion(desImage);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>YYKit中提供了另一种解码方式如下，在注释中说使用原始数据解码会造成丢失一些精度。</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">  + (void)decodeSourceImage1:(UIImage *)sourceImage completion:(nonnull void (^)(UIImage<span class="operator"> * </span>_Nonnull))completion &#123;</span><br><span class="line">    <span class="keyword">if</span> (!sourceImage) return;</span><br><span class="line">    dispatch<span class="constructor">_async(<span class="params">dispatch_get_global_queue</span>(0, 0)</span>, ^&#123;</span><br><span class="line">        CGImageRef cgimage = sourceImage.CGImage;</span><br><span class="line">        size_t width = <span class="constructor">CGImageGetWidth(<span class="params">cgimage</span>)</span>;</span><br><span class="line">        size_t height = <span class="constructor">CGImageGetHeight(<span class="params">cgimage</span>)</span>;</span><br><span class="line">        <span class="keyword">if</span> (width<span class="operator"> == </span><span class="number">0</span><span class="operator"> || </span>height<span class="operator"> == </span><span class="number">0</span>) return;</span><br><span class="line">        </span><br><span class="line">        CGColorSpaceRef colorSpace = <span class="constructor">CGImageGetColorSpace(<span class="params">cgimage</span>)</span>;</span><br><span class="line">        size_t bitsPerComponent = <span class="constructor">CGImageGetBitsPerComponent(<span class="params">cgimage</span>)</span>;</span><br><span class="line">        size_t bitsPerPixel = <span class="constructor">CGImageGetBitsPerPixel(<span class="params">cgimage</span>)</span>;</span><br><span class="line">        size_t bytesPerRow = <span class="constructor">CGImageGetBytesPerRow(<span class="params">cgimage</span>)</span>;</span><br><span class="line">        CGBitmapInfo bitmapInfo = <span class="constructor">CGImageGetBitmapInfo(<span class="params">cgimage</span>)</span>;</span><br><span class="line">        <span class="keyword">if</span> (bytesPerRow<span class="operator"> == </span><span class="number">0</span><span class="operator"> || </span>width<span class="operator"> == </span><span class="number">0</span><span class="operator"> || </span>height<span class="operator"> == </span><span class="number">0</span>) return;</span><br><span class="line">        </span><br><span class="line">        CGDataProviderRef provider = <span class="constructor">CGImageGetDataProvider(<span class="params">cgimage</span>)</span>;</span><br><span class="line">        <span class="keyword">if</span> (!provider) return;</span><br><span class="line">        <span class="comment">//获取原始数据</span></span><br><span class="line">        CFDataRef data = <span class="constructor">CGDataProviderCopyData(<span class="params">provider</span>)</span>;</span><br><span class="line">        <span class="keyword">if</span> (!data) return;</span><br><span class="line">        </span><br><span class="line">        CGDataProviderRef newProvider = <span class="constructor">CGDataProviderCreateWithCFData(<span class="params">data</span>)</span>;</span><br><span class="line">        <span class="constructor">CFRelease(<span class="params">data</span>)</span>;</span><br><span class="line">        <span class="keyword">if</span> (!newProvider) return;</span><br><span class="line">        </span><br><span class="line">        CGImageRef newImageRef = <span class="constructor">CGImageCreate(<span class="params">width</span>, <span class="params">height</span>, <span class="params">bitsPerComponent</span>, <span class="params">bitsPerPixel</span>, <span class="params">bytesPerRow</span>, <span class="params">colorSpace</span>, <span class="params">bitmapInfo</span>, <span class="params">newProvider</span>, NULL, <span class="params">false</span>, <span class="params">kCGRenderingIntentDefault</span>)</span>;</span><br><span class="line">        UIImage *desImage = <span class="literal">[UII<span class="identifier">mage</span> <span class="identifier">imageWithCGImage</span>:<span class="identifier">newImageRef</span>]</span>; </span><br><span class="line">        dispatch<span class="constructor">_async(<span class="params">dispatch_get_main_queue</span>()</span>, ^&#123;</span><br><span class="line">            <span class="keyword">if</span> (completion) &#123;</span><br><span class="line">                completion(desImage);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        </span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Leisure</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://ugpass.github.io/2020/07/03/2020-07-03-iOS%E5%9B%BE%E7%89%87%E8%A7%A3%E7%A0%81/">http://ugpass.github.io/2020/07/03/2020-07-03-iOS%E5%9B%BE%E7%89%87%E8%A7%A3%E7%A0%81/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/iOS/"># iOS</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/07/04/2020-07-04-iOS%E4%BF%9D%E6%8C%81%E7%95%8C%E9%9D%A2%E6%B5%81%E7%95%85/">iOS保持界面流畅</a>
+            
+            
+            <a class="next" rel="next" href="/2020/07/02/2020-07-02-OpenGL%E5%B8%B8%E8%A7%81%E4%B8%93%E4%B8%9A%E5%90%8D%E8%AF%8D/">OpenGL常见专业名词</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Leisure | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

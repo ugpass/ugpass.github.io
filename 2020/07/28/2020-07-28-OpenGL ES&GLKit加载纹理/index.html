@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Leisure">
+
+
+
+    <meta name="description" content="悄悄的-开心😄">
+
+
+    <meta name="keywords" content="Leisure leisure iOS iPhone">
+
+
+<title>OpenGL ES&amp;GLKit加载纹理 | Leisure</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Leisure&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Leisure&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">OpenGL ES&amp;GLKit加载纹理</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Leisure</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">七月 28, 2020&nbsp;&nbsp;0:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/OpenGL-ES/">OpenGL ES</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>1.需要导入 <code>GLKit.framework</code></p>
+<p>2.在<code>ViewController</code>中导入</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#<span class="keyword">import</span> &lt;GLKit/GLKit.h&gt;</span><br><span class="line"></span><br><span class="line">#<span class="keyword">import</span> &lt;OpenGLES<span class="regexp">/ES3/g</span>l.h&gt;</span><br><span class="line">#<span class="keyword">import</span> &lt;OpenGLES<span class="regexp">/ES3/g</span>lext.h&gt;</span><br></pre></td></tr></table></figure>
+
+<p>3.如果将<code>ViewController</code>的父类改为<code>GLKViewController</code>,则同时需要将<code>Main.storyboard</code>中的view的类别改为<code>GLKView</code><br><img src="https://upload-images.jianshu.io/upload_images/1395687-259961490eb4539a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="修改view类别.png"></p>
+<p>当然也可以不修改<code>ViewController</code>的父类，直接在<code>ViewController</code>中自定义<code>GLKView</code></p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@<span class="keyword">property</span><span class="title"> </span>(nonatomic, strong) GLKView *glkView;</span><br></pre></td></tr></table></figure>
+
+<p>4.创建EAGLContext，并设置为当前Context</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="regexp">//</span><span class="number">1</span>.配置初始环境</span><br><span class="line">- (void)setUpConfig &#123;</span><br><span class="line">    <span class="regexp">//</span>创建EAGLContext 并设置为currentContext</span><br><span class="line">    _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];</span><br><span class="line">    <span class="keyword">if</span> (!_context) &#123;</span><br><span class="line">        NSLog(@<span class="string">&quot;_context create failed&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    [EAGLContext setCurrentContext:_context];</span><br><span class="line">    </span><br><span class="line">    <span class="regexp">//</span>配置glkView</span><br><span class="line">    GLKView *glkView = (GLKView *)self.view;</span><br><span class="line">    glkView.context = _context;</span><br><span class="line">    <span class="regexp">//</span>开启颜色缓冲区</span><br><span class="line">    glkView.drawableColorFormat = GLKViewDrawableColorFormatRGBA8888;</span><br><span class="line">    <span class="regexp">//</span>开启深度测试缓冲区</span><br><span class="line">    glkView.drawableDepthFormat = GLKViewDrawableDepthFormatNone;</span><br><span class="line">    </span><br><span class="line">    <span class="regexp">//</span>设置glkView的背景颜色</span><br><span class="line">    glClearColor(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>5.设置顶点数据以及纹理数据 拷贝到顶点缓冲区</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//设置顶点数据以及纹理数据 拷贝到顶点缓冲区</span></span><br><span class="line">-(void)setUpVertexData</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//1.设置顶点数组(顶点坐标,纹理坐标)</span></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     纹理坐标系取值范围[0,1];原点是左下角(0,0);</span></span><br><span class="line"><span class="comment">     故而(0,0)是纹理图像的左下角, 点(1,1)是右上角.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    GLfloat vertexData<span class="literal">[]</span> = &#123;</span><br><span class="line">        </span><br><span class="line">        <span class="number">0.5</span>, -<span class="number">0.5</span>, <span class="number">0.0</span>f,    <span class="number">1.0</span>f, <span class="number">0.0</span>f, <span class="comment">//右下</span></span><br><span class="line">        <span class="number">0.5</span>, <span class="number">0.5</span>,  <span class="number">0.0</span>f,    <span class="number">1.0</span>f, <span class="number">1.0</span>f, <span class="comment">//右上</span></span><br><span class="line">        -<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.0</span>f,    <span class="number">0.0</span>f, <span class="number">1.0</span>f, <span class="comment">//左上</span></span><br><span class="line">        </span><br><span class="line">        <span class="number">0.5</span>, -<span class="number">0.5</span>, <span class="number">0.0</span>f,    <span class="number">1.0</span>f, <span class="number">0.0</span>f, <span class="comment">//右下</span></span><br><span class="line">        -<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.0</span>f,    <span class="number">0.0</span>f, <span class="number">1.0</span>f, <span class="comment">//左上</span></span><br><span class="line">        -<span class="number">0.5</span>, -<span class="number">0.5</span>, <span class="number">0.0</span>f,   <span class="number">0.0</span>f, <span class="number">0.0</span>f, <span class="comment">//左下</span></span><br><span class="line">    &#125;;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     顶点数组: 开发者可以选择设定函数指针，在调用绘制方法的时候，直接由内存传入顶点数据，也就是说这部分数据之前是存储在内存当中的，被称为顶点数组</span></span><br><span class="line"><span class="comment">     </span></span><br><span class="line"><span class="comment">     顶点缓存区: 性能更高的做法是，提前分配一块显存，将顶点数据预先传入到显存当中。这部分的显存，就被称为顶点缓冲区</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">//2.开辟顶点缓存区</span></span><br><span class="line">    <span class="comment">//(1).创建顶点缓存区标识符ID</span></span><br><span class="line">    GLuint bufferID;</span><br><span class="line">    gl<span class="constructor">GenBuffers(1, &amp;<span class="params">bufferID</span>)</span>;</span><br><span class="line">    <span class="comment">//(2).绑定顶点缓存区.(明确作用)</span></span><br><span class="line">    gl<span class="constructor">BindBuffer(GL_ARRAY_BUFFER, <span class="params">bufferID</span>)</span>;</span><br><span class="line">    <span class="comment">//(3).将顶点数组的数据copy到顶点缓存区中(GPU显存中)</span></span><br><span class="line">    gl<span class="constructor">BufferData(GL_ARRAY_BUFFER, <span class="params">sizeof</span>(<span class="params">vertexData</span>)</span>, vertexData, GL_STATIC_DRAW);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//3.打开读取通道.</span></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     (1)在iOS中, 默认情况下，出于性能考虑，所有顶点着色器的属性（Attribute）变量都是关闭的.</span></span><br><span class="line"><span class="comment">     意味着,顶点数据在着色器端(服务端)是不可用的. 即使你已经使用glBufferData方法,将顶点数据从内存拷贝到顶点缓存区中(GPU显存中).</span></span><br><span class="line"><span class="comment">     所以, 必须由glEnableVertexAttribArray 方法打开通道.指定访问属性.才能让顶点着色器能够访问到从CPU复制到GPU的数据.</span></span><br><span class="line"><span class="comment">     注意: 数据在GPU端是否可见，即，着色器能否读取到数据，由是否启用了对应的属性决定，这就是glEnableVertexAttribArray的功能，允许顶点着色器读取GPU（服务器端）数据。</span></span><br><span class="line"><span class="comment">   </span></span><br><span class="line"><span class="comment">    (2)方法简介</span></span><br><span class="line"><span class="comment">    glVertexAttribPointer (GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr)</span></span><br><span class="line"><span class="comment">   </span></span><br><span class="line"><span class="comment">    功能: 上传顶点数据到显存的方法（设置合适的方式从buffer里面读取数据）</span></span><br><span class="line"><span class="comment">    参数列表:</span></span><br><span class="line"><span class="comment">        index,指定要修改的顶点属性的索引值,例如</span></span><br><span class="line"><span class="comment">        size, 每次读取数量。（如position是由3个（x,y,z）组成，而颜色是4个（r,g,b,a）,纹理则是2个.）</span></span><br><span class="line"><span class="comment">        type,指定数组中每个组件的数据类型。可用的符号常量有GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT,GL_UNSIGNED_SHORT, GL_FIXED, 和 GL_FLOAT，初始值为GL_FLOAT。</span></span><br><span class="line"><span class="comment">        normalized,指定当被访问时，固定点数据值是否应该被归一化（GL_TRUE）或者直接转换为固定点值（GL_FALSE）</span></span><br><span class="line"><span class="comment">        stride,指定连续顶点属性之间的偏移量。如果为0，那么顶点属性会被理解为：它们是紧密排列在一起的。初始值为0</span></span><br><span class="line"><span class="comment">        ptr指定一个指针，指向数组中第一个顶点属性的第一个组件。初始值为0</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">//顶点坐标数据</span></span><br><span class="line">    gl<span class="constructor">EnableVertexAttribArray(GLKVertexAttribPosition)</span>;</span><br><span class="line">    gl<span class="constructor">VertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, <span class="params">sizeof</span>(GLfloat)</span><span class="operator"> * </span><span class="number">5</span>, (GLfloat *)NULL + <span class="number">0</span>);</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="comment">//纹理坐标数据</span></span><br><span class="line">    gl<span class="constructor">EnableVertexAttribArray(GLKVertexAttribTexCoord0)</span>;</span><br><span class="line">    gl<span class="constructor">VertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, <span class="params">sizeof</span>(GLfloat)</span><span class="operator"> * </span><span class="number">5</span>, (GLfloat *)NULL + <span class="number">3</span>);</span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>6.加载纹理</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//加载纹理</span></span><br><span class="line">-(<span class="keyword">void</span>)setUpTexture</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//1.获取纹理图片路径</span></span><br><span class="line">    NSString *filePath = [[NSBundle mainBundle] <span class="attr">pathForResource:</span>@<span class="string">&quot;mew_interlaced&quot;</span> <span class="attr">ofType:</span>@<span class="string">&quot;png&quot;</span>];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//2.设置纹理参数</span></span><br><span class="line">    <span class="comment">//纹理坐标原点是左下角,但是图片显示原点应该是左上角.</span></span><br><span class="line">    NSDictionary *options = [NSDictionary <span class="attr">dictionaryWithObjectsAndKeys:</span>@(<span class="number">1</span>),GLKTextureLoaderOriginBottomLeft, nil];</span><br><span class="line">    </span><br><span class="line">    GLKTextureInfo *textureInfo = [GLKTextureLoader <span class="attr">textureWithContentsOfFile:</span>filePath <span class="attr">options:</span>options <span class="attr">error:</span>nil];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//3.使用苹果GLKit 提供GLKBaseEffect 完成着色器工作(顶点/片元)</span></span><br><span class="line">    cEffect = [[GLKBaseEffect alloc]init];</span><br><span class="line">    cEffect.texture2d0.enabled = GL_TRUE;</span><br><span class="line">    cEffect.texture2d0.name = textureInfo.name;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>7.实现GLKView代理  绘制视图，如果是自定义<code>GLKView</code>需要设置当前控制器为代理</p>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#pragma</span> <span class="selector-tag">mark</span> <span class="selector-tag">--</span> <span class="selector-tag">GLKViewDelegate</span></span><br><span class="line"><span class="comment">//绘制视图的内容</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> GLKView对象使其OpenGL ES上下文成为当前上下文，并将其framebuffer绑定为OpenGL ES呈现命令的目标。然后，委托方法应该绘制视图的内容。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="selector-tag">-</span> (void)<span class="selector-tag">glkView</span><span class="selector-pseudo">:(GLKView</span> *)<span class="selector-tag">view</span> <span class="selector-tag">drawInRect</span><span class="selector-pseudo">:(CGRect)rect</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//1.清理颜色缓冲区、深度缓冲区、模型缓冲区</span></span><br><span class="line">    <span class="selector-tag">glClear</span>(GL_COLOR_BUFFER_BIT);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//2.准备绘制</span></span><br><span class="line">    <span class="selector-attr">[cEffect prepareToDraw]</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//3.开始绘制</span></span><br><span class="line">    <span class="selector-tag">glDrawArrays</span>(GL_TRIANGLES, <span class="number">0</span>, <span class="number">6</span>);</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Leisure</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://ugpass.github.io/2020/07/28/2020-07-28-OpenGL%20ES&GLKit%E5%8A%A0%E8%BD%BD%E7%BA%B9%E7%90%86/">http://ugpass.github.io/2020/07/28/2020-07-28-OpenGL%20ES&GLKit%E5%8A%A0%E8%BD%BD%E7%BA%B9%E7%90%86/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/OpenGL-ES/"># OpenGL ES</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/08/02/2020-08-02-%E7%BF%BB%E8%BD%AC%E7%BA%B9%E7%90%86%E7%9A%845%E7%A7%8D%E6%96%B9%E5%BC%8F/">翻转纹理的5种方式</a>
+            
+            
+            <a class="next" rel="next" href="/2020/07/22/2020-07-22-OpenGL%E7%BA%B9%E7%90%86%E5%8A%A0%E8%BD%BD%E4%B8%8E%E9%95%9C%E5%83%8F/">OpenGL纹理加载与镜像</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Leisure | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

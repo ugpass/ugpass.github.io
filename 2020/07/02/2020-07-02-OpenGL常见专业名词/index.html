@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Leisure">
+
+
+
+    <meta name="description" content="悄悄的-开心😄">
+
+
+    <meta name="keywords" content="Leisure leisure iOS iPhone">
+
+
+<title>OpenGL常见专业名词 | Leisure</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Leisure&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Leisure&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">OpenGL常见专业名词</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Leisure</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">七月 2, 2020&nbsp;&nbsp;0:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/OpenGL/">OpenGL</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>参考了<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki">维基百科</a></p>
+<p><strong>OpenGL</strong>：Open Graphis Library，是用于渲染2D、3D矢量图形的跨语言、跨平台的API。</p>
+<p><strong>OpenGL ES</strong>：OpenGL For Embedded Systems，是OpenGL的子集，针对手机、PAD和游戏主机等嵌入式设备而设计。</p>
+<p><strong>DirectX</strong>：由微软公司创建的一系列专为多媒体以及游戏开发的API。</p>
+<p><strong>Metal</strong>：Apple推出的一个兼顾图形与计算功能的，面向低层、低开销的硬件加速API。类似于将OpenGL和OpenCL的功能集成到了同一API上。</p>
+<p><strong>OpenCL</strong>：最初由Apple开发的为异构平台编写程序的框架，OpenCL扩展了GPU图形生成之外的能力。</p>
+<hr>
+<p><strong>上下文(context):</strong> 一个非常庞大的状态机，里面是对于OpenGL各种状态的描述与记录。OpenGL指令执行需要有上下文环境，执行指令即修改上下文中各种状态。切换上下文需要消耗比较大的资源。</p>
+<p><strong>渲染</strong>：是将模型数据转换成图像数据的过程，将图形/图像数据转成2D空间图像操作叫做渲染。</p>
+<p><strong>顶点数组</strong>：顶点位置数据存储在内存中即顶点数组。</p>
+<p><strong>顶点缓冲区</strong>：为了更加高效，将顶点数组拷贝到显存中，即顶点缓冲区。</p>
+<p><strong>着色器</strong>：在CPU中执行的代码段可以叫做<code>函数/方法</code>，在GPU中执行的代码段可以叫做<code>着色器(Shader)</code>。</p>
+<p><strong>管线</strong>：OpenGL在处理渲染图形处理数据时，是严格按照一定顺序进行的，把这一系列处理数据的流程理解为管线。</p>
+<p>**固定管线(存储着色器)**：类比苹果提供给开发者已经封装好的API，固定管线(存储着色器)就是由OpenGL封装好的API，开发者只需要传递参数调用即可。</p>
+<p><strong>自定义着色器</strong>：由于部分场景固定管线无法满足，OpenGL开放了部分着色器(一般指下面的<code>顶点着色器</code>和<code>片元着色器</code>)可以编程,也就是基于<code>GLSL</code>语法来编写的代码段。</p>
+<p><strong>GPU渲染流程</strong><br><img src="https://upload-images.jianshu.io/upload_images/1395687-26d9d760082af7a8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p><strong>顶点着色器</strong>：处理顶点相关。</p>
+<p>作用有：</p>
+<ul>
+<li>确定位置</li>
+<li>缩放/平移/旋转的位置换算</li>
+<li>3D图形数据转换为2D数据(投影换算)</li>
+</ul>
+<p><strong>片元着色器</strong>：片元即像素点，所以也叫像素着色器，处理一个个像素点，如120*120像素点，片元着色器需要执行14400次。如针对一张图片的饱和度调整，则需要片元着色器对每个像素点进行修改。</p>
+<p><strong>光栅化</strong>：将顶点数据转换为片元的过程。片元中的每一个元素对应帧缓冲区的一个像素。包括2个部分工作，且不可编程，只需要有认知就好。</p>
+<ul>
+<li>确定图形在像素范围内。</li>
+<li>分配一个颜色值和深度值到片元的每个元素。</li>
+</ul>
+<p><strong>纹理</strong>：即比如png和jpeg解压缩后产生的位图。</p>
+<p><strong>混合</strong>：如多个Layer图层进行叠加，不同颜色值和透明度需要进行颜色的混合计算。</p>
+<p><strong>变换矩阵</strong>：图形发生平移/旋转/缩放需要使用变换矩阵。</p>
+<p><strong>投影矩阵</strong>：3D图形转为2D坐标需要使用投影矩阵。</p>
+<p><strong>投影方式</strong>：有且只有两种，正投影(平行投影)/透视投影。</p>
+<p><strong>坐标系</strong>：</p>
+<ul>
+<li>物体坐标系</li>
+<li>世界坐标系</li>
+<li>观察者坐标系</li>
+<li>规范化设备坐标系</li>
+<li>屏幕坐标系</li>
+</ul>
+<hr>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Leisure</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://ugpass.github.io/2020/07/02/2020-07-02-OpenGL%E5%B8%B8%E8%A7%81%E4%B8%93%E4%B8%9A%E5%90%8D%E8%AF%8D/">http://ugpass.github.io/2020/07/02/2020-07-02-OpenGL%E5%B8%B8%E8%A7%81%E4%B8%93%E4%B8%9A%E5%90%8D%E8%AF%8D/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/OpenGL/"># OpenGL</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/07/03/2020-07-03-iOS%E5%9B%BE%E7%89%87%E8%A7%A3%E7%A0%81/">iOS图片解码</a>
+            
+            
+            <a class="next" rel="next" href="/2020/03/07/2020-03-07-React%20Native%E6%98%AF%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%E7%9A%84/">React Native是如何工作的</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Leisure | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

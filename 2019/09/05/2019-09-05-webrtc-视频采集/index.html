@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Leisure">
+
+
+
+    <meta name="description" content="悄悄的-开心😄">
+
+
+    <meta name="keywords" content="Leisure leisure iOS iPhone">
+
+
+<title>WebRTC的视频采集(一) | Leisure</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Leisure&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Leisure&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">WebRTC的视频采集(一)</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Leisure</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">九月 5, 2019&nbsp;&nbsp;22:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/WebRTC%E5%AD%A6%E4%B9%A0/">WebRTC学习</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>路径<code>Source/sdk/objc/components/capture</code></p>
+<h3 id="RTCCameraVideoCapturer"><a href="#RTCCameraVideoCapturer" class="headerlink" title="RTCCameraVideoCapturer"></a>RTCCameraVideoCapturer</h3><ul>
+<li><a href="#RTCVideoCapturer">RTCVideoCapturer</a></li>
+<li><a href="#RTCCameraVideoCapturer">RTCCameraVideoCapturer</a></li>
+</ul>
+<p id='RTCVideoCapturer'></p>
+### `RTCVideoCapturer`
+
+<p><code>RTCVideoCapturer</code>继承自<code>NSObject</code>，主要提供了一个视频采集回调的代理方法。</p>
+<p>代理属性</p>
+<p><code>@property(nonatomic, weak) id&lt;RTCVideoCapturerDelegate&gt; delegate;</code></p>
+<p>初始化方法</p>
+<p><code>- (instancetype)initWithDelegate:(id&lt;RTCVideoCapturerDelegate&gt;)delegate;</code></p>
+<p><code>&lt;RTCVideoCapturerDelegate&gt;</code>代理中有一个必须执行的方法</p>
+<p><code>- (void)capturer:(RTCVideoCapturer *)capturer didCaptureVideoFrame:(RTCVideoFrame *)frame;</code></p>
+<hr>
+<p id='RTCCameraVideoCapturer'></p>
+### `RTCCameraVideoCapturer `
+
+<p><code>RTCCameraVideoCapturer</code>继承自<a href="#RTCVideoCapturer">RTCVideoCapturer</a>，我理解为摄像头视频采集，可能还会有录屏采集、文件采集等其他子类。</p>
+<p>只有一个只读属性<code>AVCaptureSession *captureSession</code>。</p>
+<p><code>+ (NSArray&lt;AVCaptureDevice *&gt; *)captureDevices;</code>类方法，返回可用的设备列表。</p>
+<p><code>+ (NSArray&lt;AVCaptureDeviceFormat *&gt; *)supportedFormatsForDevice:(AVCaptureDevice *)device;</code>根据设备返回支持的<code>AVCaptureDeviceFormat *</code>类型的列表</p>
+<p><code>- (FourCharCode)preferredOutputPixelFormat;</code>返回本采集器最有效支持的输出像素格式。</p>
+<p>然后是两个开始采集和停止采集的方法，均为<strong>异步</strong>，稍后详细讨论这几个方法。</p>
+<blockquote>
+<p>讨论1</p>
+</blockquote>
+<p><code>@property</code>分别对应<code>@synthesize</code>和<code>@dynamic</code>。默认为<code>@synthesize</code>,为属性生成一个<code>_propertyName</code>的成员变量，并自动生成setter和getter方法。</p>
+<p><code>@synthesize</code>为属性声明一个非<code>_propertyName</code>的成员变量，之后使用<code>_propertyName</code>会报错。</p>
+<p><code>protocol</code>中声明的属性需要使用<code>@synthesize</code>，因为协议不会自动为属性声明setter和getter方法</p>
+<p><code>@dynamic var</code>用于告诉编译器，我要自己声明setter和getter方法，不需要自动生成。</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- (instance<span class="keyword">type</span>)initWithDelegate:(__weak id&lt;<span class="type">RTCVideoCapturerDelegate</span>&gt;)delegate</span><br><span class="line">                  captureSession:(<span class="type">AVCaptureSession</span> *)captureSession</span><br></pre></td></tr></table></figure>
+
+<p>最终的初始化方法，在此方法中添加了一些监听事件。</p>
+<ul>
+<li><p><code>UIDeviceOrientationDidChangeNotification</code>设备方向发生变化</p>
+</li>
+<li><p><code>AVCaptureSessionWasInterruptedNotification</code>音视频采集已经（开始）被打断</p>
+</li>
+<li><p><code>AVCaptureSessionInterruptionEndedNotification</code>音视频采集打断结束</p>
+</li>
+<li><p><code>UIApplicationDidBecomeActiveNotification</code>应用变为激活状态</p>
+</li>
+<li><p><code>AVCaptureSessionRuntimeErrorNotification</code>AVCaptureSession实例正在运行时发生未知错误</p>
+</li>
+<li><p><code>AVCaptureSessionDidStartRunningNotification</code>AVCaptureSession实例成功开始运行</p>
+</li>
+<li><p><code>AVCaptureSessionDidStopRunningNotification</code>AVCaptureSession实例停止运行</p>
+</li>
+</ul>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">- <span class="params">(dispatch_queue_t)</span>frameQueue &#123;</span><br><span class="line">  if <span class="params">(!_frameQueue)</span> &#123;</span><br><span class="line">    _frameQueue =</span><br><span class="line">        dispatch_queue_create<span class="params">(<span class="string">&quot;org.webrtc.cameravideocapturer.video&quot;</span>, DISPATCH_QUEUE_SERIAL)</span>;</span><br><span class="line">    dispatch_set_target_queue<span class="params">(_frameQueue,</span></span><br><span class="line"><span class="params">                              dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, <span class="number">0</span>))</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  return _frameQueue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>采集队列为串行队列，并且将优先级设置为高。</p>
+<p><code>&lt;AVCaptureVideoDataOutputSampleBufferDelegate&gt;</code>代理</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 当AVCaptureVideoDataOutput的实例给出一个新的视频帧时会调用这个方法</span></span><br><span class="line"><span class="comment">* output：对应的给出视频帧的AVCaptureVideoDataOutput的实例对象</span></span><br><span class="line"><span class="comment">* sampleBuffer：一个CMSampleBuffer对象，包含视频帧数据和其他信息，比如编码和时间戳</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">- (<span class="keyword">void</span>)captureOutput:(<span class="built_in">AVCaptureOutput</span> *)captureOutput</span><br><span class="line">    didOutputSampleBuffer:(<span class="built_in">CMSampleBufferRef</span>)sampleBuffer</span><br><span class="line">           fromConnection:(<span class="built_in">AVCaptureConnection</span> *)connection &#123;</span><br><span class="line">           </span><br><span class="line">  <span class="comment">//判断当前output是否与预期的_videoDataOutput一致</span></span><br><span class="line">  <span class="built_in">NSParameterAssert</span>(captureOutput == _videoDataOutput);</span><br><span class="line"></span><br><span class="line">  <span class="comment">//CMSampleBufferGetNumSamples获取媒体样本数，返回0即有错误</span></span><br><span class="line">  <span class="comment">//CMSampleBufferIsValid判断sbuf是否可用</span></span><br><span class="line">  <span class="comment">//CMSampleBufferDataIsReady判断sbuf的数据是否准备好</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">CMSampleBufferGetNumSamples</span>(sampleBuffer) != <span class="number">1</span> || !<span class="built_in">CMSampleBufferIsValid</span>(sampleBuffer) ||</span><br><span class="line">      !<span class="built_in">CMSampleBufferDataIsReady</span>(sampleBuffer)) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//将sampleBuffer转为imageBuffer，CVPixelBufferRef为CVImageBufferRef的别名</span></span><br><span class="line">  CVPixelBufferRef pixelBuffer = <span class="built_in">CMSampleBufferGetImageBuffer</span>(sampleBuffer);</span><br><span class="line">  <span class="keyword">if</span> (pixelBuffer == <span class="literal">nil</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> TARGET_OS_IPHONE </span></span><br><span class="line">  <span class="built_in">BOOL</span> usingFrontCamera = <span class="literal">NO</span>;</span><br><span class="line">  <span class="comment">// Check the image&#x27;s EXIF for the camera the image came from as the image could have been</span></span><br><span class="line">  <span class="comment">// delayed as we set alwaysDiscardsLateVideoFrames to NO.</span></span><br><span class="line">  <span class="comment">//根据sampleBuffer获取照相机的方向，判断是否使用前置摄像头</span></span><br><span class="line">  <span class="built_in">AVCaptureDevicePosition</span> cameraPosition =</span><br><span class="line">      [<span class="built_in">AVCaptureSession</span> devicePositionForSampleBuffer:sampleBuffer];</span><br><span class="line">  <span class="keyword">if</span> (cameraPosition != <span class="built_in">AVCaptureDevicePositionUnspecified</span>) &#123;</span><br><span class="line">    usingFrontCamera = <span class="built_in">AVCaptureDevicePositionFront</span> == cameraPosition;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="built_in">AVCaptureDeviceInput</span> *deviceInput =</span><br><span class="line">        (<span class="built_in">AVCaptureDeviceInput</span> *)((<span class="built_in">AVCaptureInputPort</span> *)connection.inputPorts.firstObject).input;</span><br><span class="line">    usingFrontCamera = <span class="built_in">AVCaptureDevicePositionFront</span> == deviceInput.device.position;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">switch</span> (_orientation) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="built_in">UIDeviceOrientationPortrait</span>:</span><br><span class="line">      _rotation = RTCVideoRotation_90;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="built_in">UIDeviceOrientationPortraitUpsideDown</span>:</span><br><span class="line">      _rotation = RTCVideoRotation_270;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="built_in">UIDeviceOrientationLandscapeLeft</span>:</span><br><span class="line">      _rotation = usingFrontCamera ? RTCVideoRotation_180 : RTCVideoRotation_0;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="built_in">UIDeviceOrientationLandscapeRight</span>:</span><br><span class="line">      _rotation = usingFrontCamera ? RTCVideoRotation_0 : RTCVideoRotation_180;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="built_in">UIDeviceOrientationFaceUp</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="built_in">UIDeviceOrientationFaceDown</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="built_in">UIDeviceOrientationUnknown</span>:</span><br><span class="line">      <span class="comment">// Ignore.</span></span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">  <span class="comment">// No rotation on Mac.</span></span><br><span class="line">  _rotation = RTCVideoRotation_0;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">  <span class="comment">//将imageBuffer转为RTC的RTCCVPixelBuffer</span></span><br><span class="line">  RTCCVPixelBuffer *rtcPixelBuffer = [[RTCCVPixelBuffer alloc] initWithPixelBuffer:pixelBuffer];</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//获取时间戳</span></span><br><span class="line">  int64_t timeStampNs = <span class="built_in">CMTimeGetSeconds</span>(<span class="built_in">CMSampleBufferGetPresentationTimeStamp</span>(sampleBuffer)) *</span><br><span class="line">      kNanosecondsPerSecond;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//根据rtcPixelBuffer、方向和时间戳构造RTCVideoFrame 并回调给代理</span></span><br><span class="line">  RTCVideoFrame *videoFrame = [[RTCVideoFrame alloc] initWithBuffer:rtcPixelBuffer</span><br><span class="line">                                                           rotation:_rotation</span><br><span class="line">                                                        timeStampNs:timeStampNs];</span><br><span class="line">  [<span class="keyword">self</span>.delegate capturer:<span class="keyword">self</span> didCaptureVideoFrame:videoFrame];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 当有一帧被丢弃时调用</span></span><br><span class="line"><span class="comment">* sampleBuffer：被丢弃帧的元数据，比如时常和时间戳，不包含实际的视频数据</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">- (<span class="keyword">void</span>)<span class="attr">captureOutput:</span>(AVCaptureOutput *)output <span class="attr">didDropSampleBuffer:</span>(CMSampleBufferRef)sampleBuffer <span class="attr">fromConnection:</span>(AVCaptureConnection *)connection;</span><br></pre></td></tr></table></figure>
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Leisure</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://ugpass.github.io/2019/09/05/2019-09-05-webrtc-%E8%A7%86%E9%A2%91%E9%87%87%E9%9B%86/">http://ugpass.github.io/2019/09/05/2019-09-05-webrtc-%E8%A7%86%E9%A2%91%E9%87%87%E9%9B%86/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/WebRTC%E5%AD%A6%E4%B9%A0/"># WebRTC学习</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/03/07/2020-03-07-React%20Native%E6%98%AF%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%E7%9A%84/">React Native是如何工作的</a>
+            
+            
+            <a class="next" rel="next" href="/2019/09/02/2019-08-30-react-native-WebView%E5%92%8CH5%E4%BA%A4%E4%BA%92/">RN的WebView、OC的WKWebView和H5交互</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Leisure | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

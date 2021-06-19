@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Leisure">
+
+
+
+    <meta name="description" content="悄悄的-开心😄">
+
+
+    <meta name="keywords" content="Leisure leisure iOS iPhone">
+
+
+<title>objc_msgSend源码解析(一) | Leisure</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Leisure&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Leisure&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">objc_msgSend源码解析(一)</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Leisure</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">九月 20, 2020&nbsp;&nbsp;0:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/iOS%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/">iOS底层原理</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/55daf526120d">objc_msgSend源码解析(一)</a><br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/7128dac1f0e8">objc_msgSend源码解析(二)</a></p>
+<h4 id="1-objc-msgSend源码解析"><a href="#1-objc-msgSend源码解析" class="headerlink" title="1. objc_msgSend源码解析"></a>1. <code>objc_msgSend</code>源码解析</h4><p>在 objc4源码中全局搜索<code>objc_msgSend</code>可知该方法由汇编实现，在iOS平台下实现是在<code>objc-msg-arm64.s</code>文件中。</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">ENTRY _objc_msgSend </span><br><span class="line"><span class="regexp">//</span>进入objc_msgSend流程</span><br><span class="line"></span><br><span class="line">cmp	p0, <span class="comment">#0			// nil check and tagged pointer check</span></span><br><span class="line"><span class="regexp">//</span>p0为第一个参数消息接收者，判断消息接收者是否为nil或者为taggedPointer类型</span><br><span class="line"></span><br><span class="line"><span class="comment">#if SUPPORT_TAGGED_POINTERS</span></span><br><span class="line">	b.le	LNilOrTagged		<span class="regexp">//</span>  (MSB tagged pointer looks negative)</span><br><span class="line">    <span class="regexp">//</span>如果为taggedPointer 则跳转到LNilOrTagged</span><br><span class="line"><span class="comment">#else</span></span><br><span class="line">	b.eq	LReturnZero</span><br><span class="line">    <span class="regexp">//</span>如果为nil 则跳转到LReturnZero</span><br><span class="line"><span class="comment">#endif</span></span><br><span class="line"></span><br><span class="line">ldr	p13, [x0]		<span class="regexp">//</span> p13 = isa</span><br><span class="line"><span class="regexp">//</span>取出消息接收者的isa</span><br><span class="line"></span><br><span class="line">	GetClassFromIsa_p16 p13		<span class="regexp">//</span> p16 = class</span><br><span class="line"><span class="regexp">//</span>获取isa指向的class</span><br><span class="line"></span><br><span class="line">LGetIsaDone:</span><br><span class="line">	<span class="regexp">//</span> calls imp or objc_msgSend_uncached</span><br><span class="line">	CacheLookup NORMAL, _objc_msgSend</span><br><span class="line"><span class="regexp">//</span>调用CacheLookup的NORMAL模式</span><br><span class="line"></span><br><span class="line"><span class="comment">#if SUPPORT_TAGGED_POINTERS</span></span><br><span class="line">LNilOrTagged:</span><br><span class="line">	b.eq	LReturnZero		<span class="regexp">//</span> nil check</span><br><span class="line">    <span class="regexp">//</span>taggedPointer作为消息接收者第一步同样也是跳转到LReturnZero</span><br><span class="line"></span><br><span class="line">	<span class="regexp">//</span> tagged 为taggedPointer的特殊处理</span><br><span class="line">	adrp	x10, _objc_debug_taggedpointer_classes@PAGE</span><br><span class="line">	add	x10, x10, _objc_debug_taggedpointer_classes@PAGEOFF</span><br><span class="line">	ubfx	x11, x0, <span class="comment">#60, #4</span></span><br><span class="line">	ldr	x16, [x10, x11, LSL <span class="comment">#3]</span></span><br><span class="line">	adrp	x10, _OBJC_CLASS_<span class="variable">$___NSUnrecognizedTaggedPointer</span>@PAGE</span><br><span class="line">	add	x10, x10, _OBJC_CLASS_<span class="variable">$___NSUnrecognizedTaggedPointer</span>@PAGEOFF</span><br><span class="line">	cmp	x10, x16</span><br><span class="line">	b.ne	LGetIsaDone</span><br><span class="line"></span><br><span class="line">	<span class="regexp">//</span> ext tagged</span><br><span class="line">	adrp	x10, _objc_debug_taggedpointer_ext_classes@PAGE</span><br><span class="line">	add	x10, x10, _objc_debug_taggedpointer_ext_classes@PAGEOFF</span><br><span class="line">	ubfx	x11, x0, <span class="comment">#52, #8</span></span><br><span class="line">	ldr	x16, [x10, x11, LSL <span class="comment">#3]</span></span><br><span class="line">	b	LGetIsaDone</span><br><span class="line"><span class="regexp">//</span> SUPPORT_TAGGED_POINTERS</span><br><span class="line"><span class="comment">#endif</span></span><br><span class="line"></span><br><span class="line">LReturnZero:</span><br><span class="line">    <span class="regexp">//</span>消息接收者为nil或者taggedPointer类型都是直接return</span><br><span class="line">	<span class="regexp">//</span> x0 is already zero</span><br><span class="line">	mov	x1, <span class="comment">#0</span></span><br><span class="line">	movi	d0, <span class="comment">#0</span></span><br><span class="line">	movi	d1, <span class="comment">#0</span></span><br><span class="line">	movi	d2, <span class="comment">#0</span></span><br><span class="line">	movi	d3, <span class="comment">#0</span></span><br><span class="line">	ret</span><br><span class="line"></span><br><span class="line">	END_ENTRY _objc_msgSend</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>分析：</p>
+<ol>
+<li>p0为第一个参数消息接收者，判断消息接收者是否为nil或者为taggedPointer类型</li>
+<li>如果为nil或者taggedPointer 则跳转到LReturnZero，直接return</li>
+<li>如果不为nil或taggedPointer，则将消息接收者第一个地址的isa取出，赋值给p13</li>
+<li>将p13即消息接收者的isa作为参数，调用<code>GetClassFromIsa_p16</code>，获取isa指向的类或者元类</li>
+<li>然后调用<code>CacheLookup</code>函数的NORMAL模式</li>
+</ol>
+</blockquote>
+<p><img src="https://upload-images.jianshu.io/upload_images/1395687-d6d9b57eee1f2ee3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="objc_msgSend.png"></p>
+<h4 id="2-GetClassFromIsa-p16源码解析"><a href="#2-GetClassFromIsa-p16源码解析" class="headerlink" title="2. GetClassFromIsa_p16源码解析"></a>2. <code>GetClassFromIsa_p16</code>源码解析</h4><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">.macro GetClassFromIsa_p16 <span class="regexp">/* src */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#if SUPPORT_INDEXED_ISA</span></span><br><span class="line">	<span class="regexp">//</span> Indexed isa</span><br><span class="line">	mov	p16, <span class="variable">$0</span>			<span class="regexp">//</span> optimistically set dst = src</span><br><span class="line">	tbz	p16, <span class="comment">#ISA_INDEX_IS_NPI_BIT, 1f	// done if not non-pointer isa</span></span><br><span class="line">	<span class="regexp">//</span> isa <span class="keyword">in</span> p16 is indexed</span><br><span class="line">	adrp	x10, _objc_indexed_classes@PAGE</span><br><span class="line">	add	x10, x10, _objc_indexed_classes@PAGEOFF</span><br><span class="line">	ubfx	p16, p16, <span class="comment">#ISA_INDEX_SHIFT, #ISA_INDEX_BITS  // extract index</span></span><br><span class="line">	ldr	p16, [x10, p16, UXTP <span class="comment">#PTRSHIFT]	// load class from array</span></span><br><span class="line"><span class="number">1</span>:</span><br><span class="line"></span><br><span class="line"><span class="regexp">//</span>在<span class="number">64</span>位下根据传入的第一个参数 即 isa &amp; ISA_MASK 取出class</span><br><span class="line"><span class="comment">#elif __LP64__</span></span><br><span class="line">	<span class="regexp">//</span> <span class="number">64</span>-bit packed isa</span><br><span class="line">	and	p16, <span class="variable">$0</span>, <span class="comment">#ISA_MASK</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#else</span></span><br><span class="line">	<span class="regexp">//</span> <span class="number">32</span>-bit raw isa</span><br><span class="line">	mov	p16, <span class="variable">$0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#endif</span></span><br><span class="line"></span><br><span class="line">.endmacro</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>分析： 在64位下根据传入的第一个参数 即 isa &amp; ISA_MASK 取出class</p>
+</blockquote>
+<h4 id="3-CacheLookup源码解析"><a href="#3-CacheLookup源码解析" class="headerlink" title="3. CacheLookup源码解析"></a>3. <code>CacheLookup</code>源码解析</h4><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#define PTRSHIFT 3  // 1&lt;&lt;PTRSHIFT == PTRSIZE</span></span><br><span class="line"></span><br><span class="line">.macro CacheLookup</span><br><span class="line"></span><br><span class="line">LLookupStart<span class="variable">$1</span>:</span><br><span class="line"></span><br><span class="line">	<span class="regexp">//</span> p1 = SEL, p16 = isa</span><br><span class="line">	ldr	p11, [x16, <span class="comment">#CACHE]				// p11 = mask|buckets</span></span><br><span class="line"><span class="regexp">//</span>获取isa指向class中的cache_t cache结构中的mask|buckets</span><br><span class="line"></span><br><span class="line"><span class="regexp">//</span>在iOS下走以下分支</span><br><span class="line"><span class="comment">#if CACHE_MASK_STORAGE == CACHE_MASK_STORAGE_HIGH_16</span></span><br><span class="line"><span class="regexp">//</span>将p11中存的mask|buckets &amp; <span class="number">0</span>x0000ffffffffffff，获取低<span class="number">48</span>位的为buckets</span><br><span class="line">	and	p10, p11, <span class="comment">#0x0000ffffffffffff	// p10 = buckets</span></span><br><span class="line"></span><br><span class="line"><span class="regexp">//</span>将p11中存的mask|buckets 逻辑右移<span class="number">48</span>位，即将buckets顶出去，留下<span class="number">16</span>位的mask；然后将获取到的mask &amp; p1(_cmd)，获取到buckets数组中要查找的index，即index = _cmd &amp; mask</span><br><span class="line">	and	p12, p1, p11, LSR <span class="comment">#48		// x12 = _cmd &amp; mask</span></span><br><span class="line"><span class="comment">#elif CACHE_MASK_STORAGE == CACHE_MASK_STORAGE_LOW_4</span></span><br><span class="line">	and	p10, p11, <span class="comment">#~0xf			// p10 = buckets</span></span><br><span class="line">	and	p11, p11, <span class="comment">#0xf			// p11 = maskShift</span></span><br><span class="line">	mov	p12, <span class="comment">#0xffff</span></span><br><span class="line">	lsr	p11, p12, p11				<span class="regexp">//</span> p11 = mask = <span class="number">0</span>xffff &gt;&gt; p11</span><br><span class="line">	and	p12, p1, p11				<span class="regexp">//</span> x12 = _cmd &amp; mask</span><br><span class="line"><span class="comment">#else</span></span><br><span class="line"><span class="comment">#error Unsupported cache mask storage for ARM64.</span></span><br><span class="line"><span class="comment">#endif</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	add	p12, p10, p12, LSL <span class="comment">#(1+PTRSHIFT)</span></span><br><span class="line">		             <span class="regexp">//</span> p12 = buckets + ((_cmd &amp; mask) &lt;&lt; (<span class="number">1</span>+PTRSHIFT))</span><br><span class="line"><span class="regexp">//</span>(<span class="number">1</span>+PTRSHIFT) = (<span class="number">1</span>+<span class="number">3</span>) = <span class="number">4</span>，由于一个bucket结构包含 IMP _imp，SEL _sel，即<span class="number">16</span>位，所以((_cmd &amp; mask) &lt;&lt; (<span class="number">1</span>+PTRSHIFT))含义为index * <span class="number">16</span>，buckets + ((_cmd &amp; mask) &lt;&lt; (<span class="number">1</span>+PTRSHIFT))含义为获取到index位置bucket的首地址赋值到p12</span><br><span class="line"></span><br><span class="line">	ldp	p17, p9, [x12]		<span class="regexp">//</span> &#123;imp, sel&#125; = *bucket</span><br><span class="line"><span class="regexp">//</span>在iOS下bucket结构为&#123;imp, sel&#125;，mac下为&#123;sel, imp&#125;</span><br><span class="line"></span><br><span class="line"><span class="number">1</span>:	cmp	p9, p1			<span class="regexp">//</span> <span class="keyword">if</span> (bucket-&gt;sel != _cmd)</span><br><span class="line"><span class="regexp">//</span>比较bucket的sel和所需查找的_cmd是否相等</span><br><span class="line"></span><br><span class="line">	b.ne	<span class="number">2</span>f			<span class="regexp">//</span>     scan more</span><br><span class="line"><span class="regexp">//</span>如果不相等 跳转到<span class="number">2</span></span><br><span class="line"></span><br><span class="line">	CacheHit <span class="variable">$0</span>			<span class="regexp">//</span> call or return imp</span><br><span class="line"><span class="regexp">//</span>如果缓存命中，则直接返回imp</span><br><span class="line">	</span><br><span class="line"><span class="number">2</span>:	<span class="regexp">//</span> not hit: p12 = not-hit bucket</span><br><span class="line">	CheckMiss <span class="variable">$0</span>			<span class="regexp">//</span> miss <span class="keyword">if</span> bucket-&gt;sel == <span class="number">0</span></span><br><span class="line"><span class="regexp">//</span>首先检查bucket的_sel是否等于<span class="number">0</span>，如果等于<span class="number">0</span>，跳转到CheckMiss</span><br><span class="line"></span><br><span class="line">	cmp	p12, p10		<span class="regexp">//</span> wrap <span class="keyword">if</span> bucket == buckets</span><br><span class="line"><span class="regexp">//</span>判断获取的bucket是否是buckets中的第一个</span><br><span class="line"></span><br><span class="line">	b.eq	<span class="number">3</span>f</span><br><span class="line"><span class="regexp">//</span>如果遍历到数组的首个元素，则跳转到<span class="number">3</span>，之后不会返回来继续，否则形成死循环</span><br><span class="line"></span><br><span class="line">	ldp	p17, p9, [x12, <span class="comment">#-BUCKET_SIZE]!	// &#123;imp, sel&#125; = *--bucket</span></span><br><span class="line"><span class="regexp">//</span>如果不是数组首个元素，则取得前一个bucket的imp和sel，继续进行比较</span><br><span class="line"></span><br><span class="line">	b	<span class="number">1</span>b			<span class="regexp">//</span> loop</span><br><span class="line"></span><br><span class="line"><span class="number">3</span>:	<span class="regexp">//</span> wrap: p12 = first bucket, w11 = mask</span><br><span class="line"><span class="comment">#if CACHE_MASK_STORAGE == CACHE_MASK_STORAGE_HIGH_16</span></span><br><span class="line">	add	p12, p12, p11, LSR <span class="comment">#(48 - (1+PTRSHIFT))</span></span><br><span class="line">					<span class="regexp">//</span> p12 = buckets + (mask &lt;&lt; <span class="number">1</span>+PTRSHIFT)</span><br><span class="line"><span class="regexp">//m</span>ask为数组个数capacity减一，(mask &lt;&lt; <span class="number">1</span>+PTRSHIFT)为mask * <span class="number">16</span>，即获取数组最后一个bucket赋值给p12</span><br><span class="line"></span><br><span class="line"><span class="comment">#elif CACHE_MASK_STORAGE == CACHE_MASK_STORAGE_LOW_4</span></span><br><span class="line">	add	p12, p12, p11, LSL <span class="comment">#(1+PTRSHIFT)</span></span><br><span class="line">					<span class="regexp">//</span> p12 = buckets + (mask &lt;&lt; <span class="number">1</span>+PTRSHIFT)</span><br><span class="line"><span class="comment">#else</span></span><br><span class="line"><span class="comment">#error Unsupported cache mask storage for ARM64.</span></span><br><span class="line"><span class="comment">#endif</span></span><br><span class="line"></span><br><span class="line">	<span class="regexp">//</span> Clone scanning loop to miss instead of hang when cache is corrupt.</span><br><span class="line">	<span class="regexp">//</span> The slow path may detect any corruption and halt later.</span><br><span class="line"></span><br><span class="line">	ldp	p17, p9, [x12]		<span class="regexp">//</span> &#123;imp, sel&#125; = *bucket</span><br><span class="line"><span class="number">1</span>:	cmp	p9, p1			<span class="regexp">//</span> <span class="keyword">if</span> (bucket-&gt;sel != _cmd)</span><br><span class="line">	b.ne	<span class="number">2</span>f			<span class="regexp">//</span>     scan more</span><br><span class="line">	CacheHit <span class="variable">$0</span>			<span class="regexp">//</span> call or return imp</span><br><span class="line">	</span><br><span class="line"><span class="number">2</span>:	<span class="regexp">//</span> not hit: p12 = not-hit bucket</span><br><span class="line">	CheckMiss <span class="variable">$0</span>			<span class="regexp">//</span> miss <span class="keyword">if</span> bucket-&gt;sel == <span class="number">0</span></span><br><span class="line">	cmp	p12, p10		<span class="regexp">//</span> wrap <span class="keyword">if</span> bucket == buckets</span><br><span class="line">	b.eq	<span class="number">3</span>f</span><br><span class="line">	ldp	p17, p9, [x12, <span class="comment">#-BUCKET_SIZE]!	// &#123;imp, sel&#125; = *--bucket</span></span><br><span class="line">	b	<span class="number">1</span>b			<span class="regexp">//</span> loop</span><br><span class="line"></span><br><span class="line">LLookupEnd<span class="variable">$1</span>:</span><br><span class="line">LLookupRecover<span class="variable">$1</span>:</span><br><span class="line"><span class="number">3</span>:	<span class="regexp">//</span> double wrap</span><br><span class="line">	JumpMiss <span class="variable">$0</span></span><br><span class="line"></span><br><span class="line">.endmacro</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>分析：</p>
+<ol>
+<li>找到isa指向的类，偏移16字节后取到cache_t cache元素的首地址，首地址在iOS下为<code>_maskAndBuckets</code>赋值到p11</li>
+<li>p11 &amp; 0x0000ffffffffffff，得到低48位的buckets</li>
+<li>p11逻辑右移48位，得到mask，mask &amp; _cmd得到数组buckets起始查找位置的index</li>
+<li>index &lt;&lt; 4，即index * 16字节，获取到index所指向bucket的首地址p12</li>
+<li>p17, p9 分别为imp，sel<br>///第一步</li>
+<li>比较p9和p1(即传入的第二个参数，所要查找的SEL _cmp)</li>
+<li>如果不想等，则跳转到2f，如果相等则缓存命中，返回sel所对应的函数指针地址imp<br>///第二步</li>
+<li>首先检查bucket的sel是否等于0，如果等于0则跳转到<code>CheckMiss</code></li>
+<li>如果bucket的sel不等于0，判断bucket是否为数组第一个元素，如果是，则跳转到第三步，之后不会走下一步，而是直接走第三步之后的代码，否则形成死循环</li>
+<li>如果bucket不是数组第一个元素，则获取前一个bucket，将新的imp和sel赋值到p17和p9，并跳转到第一步进行循环</li>
+</ol>
+</blockquote>
+<blockquote>
+<p>///第三步<br>11. mask为数组buckets元素个数(capacity-1)，mask &lt;&lt; 4，即获取数组最后一个元素bucket的首地址，赋值给p12</p>
+</blockquote>
+<blockquote>
+<p>12.之后的第一步和上面第一步一样，第二步如果走到数组buckets的第一个元素仍然没有找到，则直接跳转到第三步即<code>JumpMiss</code></p>
+</blockquote>
+<p><img src="https://upload-images.jianshu.io/upload_images/1395687-45650706f1f09463.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="cachelookup.png"></p>
+<h4 id="4-CheckMiss源码分析"><a href="#4-CheckMiss源码分析" class="headerlink" title="4. CheckMiss源码分析"></a>4. <code>CheckMiss</code>源码分析</h4><figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">.macro</span> CheckMiss</span><br><span class="line">	<span class="string">//</span> miss <span class="keyword">if</span> bucket-&gt;sel == 0</span><br><span class="line"><span class="string">.if</span> $0 == GETIMP</span><br><span class="line">	cbz	p9, LGetImpMiss</span><br><span class="line"><span class="string">.elseif</span> $0 == NORMAL</span><br><span class="line">	cbz	p9, __objc_msgSend_uncached</span><br><span class="line"><span class="string">.elseif</span> $0 == LOOKUP</span><br><span class="line">	cbz	p9, __objc_msgLookup_uncached</span><br><span class="line"><span class="string">.else</span></span><br><span class="line"><span class="string">.abort</span> oops</span><br><span class="line"><span class="string">.endif</span></span><br><span class="line"><span class="string">.endmacro</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>分析：此时为NORMAL模式，则进入<code>__objc_msgSend_uncached</code>流程</p>
+</blockquote>
+<h4 id="5-objc-msgSend-uncached源码分析"><a href="#5-objc-msgSend-uncached源码分析" class="headerlink" title="5. __objc_msgSend_uncached源码分析"></a>5. <code>__objc_msgSend_uncached</code>源码分析</h4><figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">STATIC_ENTRY __objc_msgSend_uncached</span><br><span class="line">	UNWIND __objc_msgSend_uncached, FrameWithNoSaves</span><br><span class="line"></span><br><span class="line">	// THIS <span class="keyword">IS</span> <span class="keyword">NOT</span> A CALLABLE C <span class="keyword">FUNCTION</span></span><br><span class="line">	// <span class="keyword">Out</span>-<span class="keyword">of</span>-band p16 <span class="keyword">is</span> the <span class="keyword">class</span> <span class="keyword">to</span> <span class="keyword">search</span></span><br><span class="line">	</span><br><span class="line">	MethodTableLookup</span><br><span class="line">	TailCallFunctionPointer x17</span><br><span class="line"></span><br><span class="line">	END_ENTRY __objc_msgSend_uncached</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>分析：此时快速缓存查找没有找到对应imp，调用<code>MethodTableLookup</code>函数中调用<code>_lookUpImpOrForward</code>，进入对应类或元类的methodlist查找流程</p>
+</blockquote>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Leisure</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://ugpass.github.io/2020/09/20/2020-09-20-objc_msgSend%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90(%E4%B8%80)/">http://ugpass.github.io/2020/09/20/2020-09-20-objc_msgSend%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90(%E4%B8%80)/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/iOS%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/"># iOS底层原理</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/09/23/2020-09-23-objc_msgSend%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90(%E4%BA%8C)/">objc_msgSend源码解析(二)</a>
+            
+            
+            <a class="next" rel="next" href="/2020/09/18/2020-09-18-iOS%20cache_t%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90/">iOS cache_t结构分析</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Leisure | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>
