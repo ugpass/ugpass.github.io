@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Leisure">
+
+
+
+    <meta name="description" content="悄悄的-开心😄">
+
+
+    <meta name="keywords" content="Leisure leisure iOS iPhone">
+
+
+<title>Objective-C Dispatch Direct | Leisure</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Leisure&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Leisure&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Objective-C Dispatch Direct</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Leisure</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">六月 25, 2021&nbsp;&nbsp;0:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/iOS/">iOS</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="Objective-C-Dispatch-Direct"><a href="#Objective-C-Dispatch-Direct" class="headerlink" title="Objective-C Dispatch Direct"></a>Objective-C Dispatch Direct</h2><h3 id="Method-通过给Clang-传递-objc-direct"><a href="#Method-通过给Clang-传递-objc-direct" class="headerlink" title="Method 通过给Clang 传递 objc_direct"></a>Method 通过给Clang 传递 objc_direct</h3><pre><code>@interface Tool : NSObject
+- (void)printMySelf;
+@end
+
+    0x100a60825 &lt;+85&gt;:  movq   %rax, -0x28(%rbp)
+-&gt;  0x100a60829 &lt;+89&gt;:  movq   -0x28(%rbp), %rax
+    0x100a6082d &lt;+93&gt;:  movq   0x7fec(%rip), %rsi        ; &quot;printMySelf&quot;
+    0x100a60834 &lt;+100&gt;: movq   %rax, %rdi
+    0x100a60837 &lt;+103&gt;: callq  *0x27d3(%rip)             ; (void *)0x00007fff20175280: objc_msgSend
+</code></pre>
+<p>上述代码 调用时，根据汇编显示callq 调用objc_msgSend发送“printMySelf”的消息</p>
+<pre><code>@interface Tool : NSObject
+- (void)printMySelf __attribute__((objc_direct));
+@end
+
+    0x10270c835 &lt;+85&gt;:  movq   %rax, -0x28(%rbp)
+-&gt;  0x10270c839 &lt;+89&gt;:  movq   -0x28(%rbp), %rax
+    0x10270c83d &lt;+93&gt;:  movq   %rax, %rdi
+    0x10270c840 &lt;+96&gt;:  callq  0x10270c2f0               ; -[Tool printMySelf] at Tool.m:33
+    0x10270c845 &lt;+101&gt;: xorl   %r8d, %r8d
+    0x10270c848 &lt;+104&gt;: movl   %r8d, %esi
+    
+    
+ /**
+ 打印类的实例方法
+ */
+void printAllInstanceMethod(Class cls) &#123;
+    unsigned int count;
+    Method *methods = class_copyMethodList(cls, &amp;count);
+    NSMutableArray *mutableA = [NSMutableArray arrayWithCapacity:10];
+    for (int i = 0; i &lt; count; i++) &#123;
+        NSString *methodName = NSStringFromSelector(method_getName(methods[i]));
+        [mutableA addObject:methodName];
+    &#125;
+    for (NSString *methodName in mutableA) &#123;
+        NSLog(@&quot;%@ has Method - %@&quot;, cls, methodName);
+    &#125;
+&#125;
+</code></pre>
+<ol>
+<li>上述代码 给函数通过给Clang传递<strong>objc_direct</strong>属性调用时，汇编显示callq 直接调用函数</li>
+<li>此时通过 <code>Method originMethod = class_getInstanceMethod([self class], @selector(printMySelf));</code>  获取该方法的Method时，会报如下错误 @selector expression formed with direct selector ‘printMySelf’ ，证明此时该方法不能被常见的runtime进行方法交换</li>
+<li>通过NSSelectorFromString 反射获取的SEL 为 0x0</li>
+<li>所以通过performSelector 调用方式会报 找不到方法的错误</li>
+<li>通过runtime获取类的方法，并获取不到被direct修饰的方法，应该在编译器确定了调用地址，直接调用</li>
+<li>一个direct method，不能被子类重写，会报如下错误 Cannot override a method that is declared direct by a superclass，同时在direct method中调用super也会报错</li>
+<li>协议中不能声明属性和方法为 direct，会报以下错误 ‘objc_direct’ attribute cannot be applied to properties declared in an Objective-C protocol</li>
+</ol>
+<h3 id="Property-通过-direct进行修饰"><a href="#Property-通过-direct进行修饰" class="headerlink" title="Property 通过 direct进行修饰"></a>Property 通过 <strong>direct</strong>进行修饰</h3><pre><code>@interface Tool : NSObject
+@property (nonatomic, strong) NSString *name;
+@end
+</code></pre>
+<p>我们都知道平时声明属性时，编译器会帮助我们生成_name成员变量、setter、getter方法</p>
+<pre><code>@interface Tool : NSObject
+@property (nonatomic, strong, direct) NSString *name;
+@end
+
+/**
+ 打印实例对象的成员变量
+ */
+void printAllIvars(NSObject *obj) &#123;
+    unsigned int count;
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    Ivar *list = class_copyIvarList([obj class], &amp;count);
+    for (int i = 0; i &lt; count; i++) &#123;
+        NSString *ivarName = [NSString stringWithUTF8String:ivar_getName(list[i])];
+        id ivarValue = [obj valueForKey:ivarName];
+        if (ivarValue) &#123;
+            dict[ivarName] = ivarValue;
+        &#125;else&#123;
+            dict[ivarName] = @&quot;&quot;;
+        &#125;
+    &#125;
+    for (NSString *ivarName in dict.allKeys) &#123;
+        NSLog(@&quot;ivarName:%@,ivarValue:%@&quot;,ivarName,dict[ivarName]);
+    &#125;
+&#125;
+</code></pre>
+<p>通过查看汇编，对应的setter 和 getter方法都是直接调用，不再走objc_msgSend流程；通过runtime获取成员变量列表，仍然有对应的_name成员变量</p>
+<pre><code>t.name= @&quot;zhangsan&quot;;
+[t addObserver:self forKeyPath:@&quot;name&quot; options:NSKeyValueObservingOptionNew context:nil];
+t.name = @&quot;lisi&quot;;
+</code></pre>
+<p>由于没有setter方法，故kvo时，并没有任何回调</p>
+<p>现在属性修饰词有以下16个</p>
+<pre><code> setter getter
+ readwrite readonly
+ strong weak copy assign unsafe_unretained
+ nullable nonnull null_resettable
+ atomic nonatomic
+ class direct
+</code></pre>
+<h3 id="objc-direct-members-修饰"><a href="#objc-direct-members-修饰" class="headerlink" title="objc_direct_members 修饰"></a><code>objc_direct_members</code> 修饰</h3><pre><code>__attribute__((objc_direct_members))
+@interface Tool()
+
+@end
+</code></pre>
+<p>在接口处添加修饰，没有任何作用</p>
+<pre><code>__attribute__((objc_direct_members))
+@implementation Tool
+</code></pre>
+<p>在实现处添加修饰，则之前未声明的成员为直接成员，以及之前未声明的方法也会被直接调用</p>
+<blockquote>
+<p> 直接派发的效率和C语言调用一样，但是Objective-C的objc_msgSend在汇编和缓存层面做了很大的优化，调用效率相差并不会很大。</p>
+<p>禁止通过runtime动态调用，作为私有实现。</p>
+<p>最大的影响应该是在包体积方面的减少，主要是在SDK这方面。主要原因是因为方法不会放在method list中</p>
+<p>如果OC的方法直接派发，仍然想要被外部可见，可以包装在C函数中</p>
+</blockquote>
+<p>学习自：</p>
+<p><a target="_blank" rel="noopener" href="https://nshipster.com/direct/">Objective-C Direct Methods</a></p>
+<p><a target="_blank" rel="noopener" href="https://clang.llvm.org/docs/AttributeReference.html#objc-direct">https://clang.llvm.org/docs/AttributeReference.html#objc-direct</a></p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Leisure</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://ugpass.github.io/2021/06/25/2021-06-24-Objective-C%20Dispatch%20Direct/">http://ugpass.github.io/2021/06/25/2021-06-24-Objective-C%20Dispatch%20Direct/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/iOS/"># iOS</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2020/10/15/2020-10-15-iOS%20APP%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">iOS APP启动流程</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Leisure | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>
