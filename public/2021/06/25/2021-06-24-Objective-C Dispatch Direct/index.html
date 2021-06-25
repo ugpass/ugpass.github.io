@@ -16,7 +16,7 @@
     <meta name="keywords" content="Leisure leisure iOS iPhone">
 
 
-<title>iOS保持界面流畅 | Leisure</title>
+<title>Objective-C Dispatch Direct | Leisure</title>
 
 
 
@@ -165,7 +165,7 @@
     
     <article class="post-wrap">
         <header class="post-header">
-            <h1 class="post-title">iOS保持界面流畅</h1>
+            <h1 class="post-title">Objective-C Dispatch Direct</h1>
             
                 <div class="post-meta">
                     
@@ -174,7 +174,7 @@
 
                     
                         <span class="post-time">
-                        Date: <a href="#">七月 4, 2020&nbsp;&nbsp;0:00:00</a>
+                        Date: <a href="#">六月 25, 2021&nbsp;&nbsp;0:00:00</a>
                         </span>
                     
                     
@@ -190,41 +190,117 @@
         </header>
 
         <div class="post-content">
-            <p>参考<a href="%5Bhttps://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/%5D(https://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/)">YYKit作者的博客</a></p>
-<h3 id="CPU和GPU的区别"><a href="#CPU和GPU的区别" class="headerlink" title="CPU和GPU的区别"></a>CPU和GPU的区别</h3><p>CPU(中央处理器 Center Processing Unit)：是计算机的运算、控制、缓存处理核心，常用来处理复杂的逻辑以及数据结构，CPU中的并行其实是通过时间切片完成的。任务之间依赖性高。</p>
-<p>GPU(图形处理器 Graphics Processing Unit)：是一种专门处理绘图运算的微型处理器，在OpenGL中使用GLSL语言来驱动，功能单一，由许多计算单元组成，任务之间依赖性低。</p>
-<hr>
-<h3 id="UIView和CALayer的联系与区别"><a href="#UIView和CALayer的联系与区别" class="headerlink" title="UIView和CALayer的联系与区别"></a>UIView和CALayer的联系与区别</h3><h4 id="UIView和CALayer的联系"><a href="#UIView和CALayer的联系" class="headerlink" title="UIView和CALayer的联系"></a>UIView和CALayer的联系</h4><ul>
-<li>UIView的实力对象中默认有一个属性CALayer</li>
-<li>UIView负责显示内容的管理，CALayer负责具体的显示</li>
-<li>UIView是对CALayer的封装，并实现了CALayer代理的方法</li>
-</ul>
-<h4 id="UIView和CALayer的区别"><a href="#UIView和CALayer的区别" class="headerlink" title="UIView和CALayer的区别"></a>UIView和CALayer的区别</h4><ul>
-<li>UIView继承自UIResponder，CALayer继承自NSObject</li>
-<li>UIView可以响应事件，CALayer不可以</li>
-</ul>
-<h3 id="图像显示原理"><a href="#图像显示原理" class="headerlink" title="图像显示原理"></a>图像显示原理</h3><p>CPU、GPU以及显示器协作完成显示。</p>
+            <h2 id="Objective-C-Dispatch-Direct"><a href="#Objective-C-Dispatch-Direct" class="headerlink" title="Objective-C Dispatch Direct"></a>Objective-C Dispatch Direct</h2><h3 id="Method-通过给Clang-传递-objc-direct"><a href="#Method-通过给Clang-传递-objc-direct" class="headerlink" title="Method 通过给Clang 传递 objc_direct"></a>Method 通过给Clang 传递 objc_direct</h3><pre><code>@interface Tool : NSObject
+- (void)printMySelf;
+@end
+
+    0x100a60825 &lt;+85&gt;:  movq   %rax, -0x28(%rbp)
+-&gt;  0x100a60829 &lt;+89&gt;:  movq   -0x28(%rbp), %rax
+    0x100a6082d &lt;+93&gt;:  movq   0x7fec(%rip), %rsi        ; &quot;printMySelf&quot;
+    0x100a60834 &lt;+100&gt;: movq   %rax, %rdi
+    0x100a60837 &lt;+103&gt;: callq  *0x27d3(%rip)             ; (void *)0x00007fff20175280: objc_msgSend
+</code></pre>
+<p>上述代码 调用时，根据汇编显示callq 调用objc_msgSend发送“printMySelf”的消息</p>
+<pre><code>@interface Tool : NSObject
+- (void)printMySelf __attribute__((objc_direct));
+@end
+
+    0x10270c835 &lt;+85&gt;:  movq   %rax, -0x28(%rbp)
+-&gt;  0x10270c839 &lt;+89&gt;:  movq   -0x28(%rbp), %rax
+    0x10270c83d &lt;+93&gt;:  movq   %rax, %rdi
+    0x10270c840 &lt;+96&gt;:  callq  0x10270c2f0               ; -[Tool printMySelf] at Tool.m:33
+    0x10270c845 &lt;+101&gt;: xorl   %r8d, %r8d
+    0x10270c848 &lt;+104&gt;: movl   %r8d, %esi
+    
+    
+ /**
+ 打印类的实例方法
+ */
+void printAllInstanceMethod(Class cls) &#123;
+    unsigned int count;
+    Method *methods = class_copyMethodList(cls, &amp;count);
+    NSMutableArray *mutableA = [NSMutableArray arrayWithCapacity:10];
+    for (int i = 0; i &lt; count; i++) &#123;
+        NSString *methodName = NSStringFromSelector(method_getName(methods[i]));
+        [mutableA addObject:methodName];
+    &#125;
+    for (NSString *methodName in mutableA) &#123;
+        NSLog(@&quot;%@ has Method - %@&quot;, cls, methodName);
+    &#125;
+&#125;
+</code></pre>
 <ol>
-<li><p>早期的显示是<strong>随机扫描显示</strong>,扫描时间和图形复杂度有关。</p>
-</li>
-<li><p>之后出现了<strong>光栅扫描显示</strong>，图像组成了像素阵列，从上到下逐行扫描，和图形复杂度无关。</p>
-</li>
+<li>上述代码 给函数通过给Clang传递<strong>objc_direct</strong>属性调用时，汇编显示callq 直接调用函数</li>
+<li>此时通过 <code>Method originMethod = class_getInstanceMethod([self class], @selector(printMySelf));</code>  获取该方法的Method时，会报如下错误 @selector expression formed with direct selector ‘printMySelf’ ，证明此时该方法不能被常见的runtime进行方法交换</li>
+<li>通过NSSelectorFromString 反射获取的SEL 为 0x0</li>
+<li>所以通过performSelector 调用方式会报 找不到方法的错误</li>
+<li>通过runtime获取类的方法，并获取不到被direct修饰的方法，应该在编译器确定了调用地址，直接调用</li>
+<li>一个direct method，不能被子类重写，会报如下错误 Cannot override a method that is declared direct by a superclass，同时在direct method中调用super也会报错</li>
+<li>协议中不能声明属性和方法为 direct，会报以下错误 ‘objc_direct’ attribute cannot be applied to properties declared in an Objective-C protocol</li>
 </ol>
-<ul>
-<li><p>简单的光栅扫描显示由于CPU和GPU的处理复杂程度，会造成GPU扫描显示时，扫描到一半，CPU的数据刷新GPU的缓冲区，显示造成<strong>撕裂</strong>效果。</p>
-</li>
-<li><p>从而引出了 <strong>垂直同步信号Vsync</strong> 和 <strong>双缓冲区</strong> 机制。</p>
-<p><strong>Vsync信号</strong>用来解决<strong>撕裂</strong>问题，相当于给帧缓冲区加了锁，必须扫描显示完一帧才会接收下一帧的数据。</p>
-<p><strong>双缓冲区</strong>用来解决CPU和GPU的处理效率问题。视频控制器读取完缓冲区一帧后，会将指针指向第二个缓冲区。</p>
-<p> 当开启Vsync垂直同步后，GPU会等待显示器的Vsync信号，进行新一帧的渲染和缓冲区的更新，从而需要耗费更多的计算资源，同时也有可能造成<strong>掉帧</strong>现象。<strong>掉帧</strong>是指当接收到Vsync信号时，CPU或GPU还没有准备够足后的数据，视频控制器拿不到Frame Buffer，仍然显示上一帧画面。</p>
-</li>
-<li><p><strong>三级缓存</strong> 和 <strong>Vsync垂直同步</strong>：提供多缓冲区，当Vsync信号出现时有足够的数据去显示，降低<strong>掉帧</strong>出现的概率。</p>
-</li>
-</ul>
-<h3 id="产生卡顿的原因"><a href="#产生卡顿的原因" class="headerlink" title="产生卡顿的原因"></a>产生卡顿的原因</h3><p>CPU负责计算显示的内容，如试图创建、布局计算、图片解码、文本绘制等。CPU计算好之后提交到GPU，由GPU进行一系列处理之后提交到帧缓冲区。当接收到Vsync信号，视频控制器从缓冲区中读取数据。如果在一个Vsync时间内，CPU或GPU没有来得及提交下一帧的数据，视频控制器会显示上一帧的，即界面保持不变，这就是卡顿的原因。</p>
-<p>解决卡顿的方案待理解补充，<a href="%5Bhttps://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/%5D(https://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/)">YYKit作者的博客</a>写的很详细了。</p>
-<p>有理解不当之处，欢迎指正。
- </p>
+<h3 id="Property-通过-direct进行修饰"><a href="#Property-通过-direct进行修饰" class="headerlink" title="Property 通过 direct进行修饰"></a>Property 通过 <strong>direct</strong>进行修饰</h3><pre><code>@interface Tool : NSObject
+@property (nonatomic, strong) NSString *name;
+@end
+</code></pre>
+<p>我们都知道平时声明属性时，编译器会帮助我们生成_name成员变量、setter、getter方法</p>
+<pre><code>@interface Tool : NSObject
+@property (nonatomic, strong, direct) NSString *name;
+@end
+
+/**
+ 打印实例对象的成员变量
+ */
+void printAllIvars(NSObject *obj) &#123;
+    unsigned int count;
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    Ivar *list = class_copyIvarList([obj class], &amp;count);
+    for (int i = 0; i &lt; count; i++) &#123;
+        NSString *ivarName = [NSString stringWithUTF8String:ivar_getName(list[i])];
+        id ivarValue = [obj valueForKey:ivarName];
+        if (ivarValue) &#123;
+            dict[ivarName] = ivarValue;
+        &#125;else&#123;
+            dict[ivarName] = @&quot;&quot;;
+        &#125;
+    &#125;
+    for (NSString *ivarName in dict.allKeys) &#123;
+        NSLog(@&quot;ivarName:%@,ivarValue:%@&quot;,ivarName,dict[ivarName]);
+    &#125;
+&#125;
+</code></pre>
+<p>通过查看汇编，对应的setter 和 getter方法都是直接调用，不再走objc_msgSend流程；通过runtime获取成员变量列表，仍然有对应的_name成员变量</p>
+<pre><code>t.name= @&quot;zhangsan&quot;;
+[t addObserver:self forKeyPath:@&quot;name&quot; options:NSKeyValueObservingOptionNew context:nil];
+t.name = @&quot;lisi&quot;;
+</code></pre>
+<p>由于没有setter方法，故kvo时，并没有任何回调</p>
+<p>现在属性修饰词有以下16个</p>
+<pre><code> setter getter
+ readwrite readonly
+ strong weak copy assign unsafe_unretained
+ nullable nonnull null_resettable
+ atomic nonatomic
+ class direct
+</code></pre>
+<h3 id="objc-direct-members-修饰"><a href="#objc-direct-members-修饰" class="headerlink" title="objc_direct_members 修饰"></a><code>objc_direct_members</code> 修饰</h3><pre><code>__attribute__((objc_direct_members))
+@interface Tool()
+
+@end
+</code></pre>
+<p>在接口处添加修饰，没有任何作用</p>
+<pre><code>__attribute__((objc_direct_members))
+@implementation Tool
+</code></pre>
+<p>在实现处添加修饰，则之前未声明的成员为直接成员，以及之前未声明的方法也会被直接调用</p>
+<blockquote>
+<p> 直接派发的效率和C语言调用一样，但是Objective-C的objc_msgSend在汇编和缓存层面做了很大的优化，调用效率相差并不会很大。</p>
+<p>禁止通过runtime动态调用，作为私有实现。</p>
+<p>最大的影响应该是在包体积方面的减少，主要是在SDK这方面。主要原因是因为方法不会放在method list中</p>
+<p>如果OC的方法直接派发，仍然想要被外部可见，可以包装在C函数中</p>
+</blockquote>
+<p>学习自：</p>
+<p><a target="_blank" rel="noopener" href="https://nshipster.com/direct/">Objective-C Direct Methods</a></p>
+<p><a target="_blank" rel="noopener" href="https://clang.llvm.org/docs/AttributeReference.html#objc-direct">https://clang.llvm.org/docs/AttributeReference.html#objc-direct</a></p>
 
         </div>
 
@@ -239,7 +315,7 @@
                 
                     <p class="copyright-item">
                         <span>Permalink:</span>
-                        <span><a href="http://ugpass.github.io/2020/07/04/2020-07-04-iOS%E4%BF%9D%E6%8C%81%E7%95%8C%E9%9D%A2%E6%B5%81%E7%95%85/">http://ugpass.github.io/2020/07/04/2020-07-04-iOS%E4%BF%9D%E6%8C%81%E7%95%8C%E9%9D%A2%E6%B5%81%E7%95%85/</a></span>
+                        <span><a href="http://ugpass.github.io/2021/06/25/2021-06-24-Objective-C%20Dispatch%20Direct/">http://ugpass.github.io/2021/06/25/2021-06-24-Objective-C%20Dispatch%20Direct/</a></span>
                     </p>
                 
                 
@@ -276,10 +352,8 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2020/07/07/2020-07-07-iOS%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/">iOS离屏渲染解析</a>
             
-            
-            <a class="next" rel="next" href="/2020/07/03/2020-07-03-iOS%E5%9B%BE%E7%89%87%E8%A7%A3%E7%A0%81/">iOS图片解码</a>
+            <a class="next" rel="next" href="/2020/10/15/2020-10-15-iOS%20APP%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">iOS APP启动流程</a>
             
         </section>
 
