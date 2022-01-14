@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Leisure">
+
+
+
+    <meta name="description" content="悄悄的-开心😄">
+
+
+    <meta name="keywords" content="Leisure leisure iOS iPhone">
+
+
+<title>xcodegen相关 | Leisure</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Leisure&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Leisure&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">xcodegen相关</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Leisure</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">一月 14, 2022&nbsp;&nbsp;0:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/iOS/">iOS</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <ul>
+<li></li>
+</ul>
+<h3 id="xcodegen相关"><a href="#xcodegen相关" class="headerlink" title="xcodegen相关"></a>xcodegen相关</h3><ul>
+<li><p>问题：xcode默认打开xxx.xcodeproj工程文件，其本身是一个文件夹，内部存放了project.xcworkspace文件夹，xcshareddata文件夹，xcuserdata文件夹，project.pbxproj文件。本次使用xcodegen生成xcodeproj工程的初衷是为了解决团队开发过程中，project.pbxproj文件冲突难以解决的问题。</p>
+</li>
+<li><p>xcodegen安装：mac <code>brew install xcodegen</code></p>
+</li>
+<li><p>生成命令：需要在项目根目录创建一个yml格式的文件，使用xcodegen进行生成工程时，默认配置文件为<code>project.yml</code>,如果想要自定义，则需要使用<code>xcodegen --spec xxx.yml</code>来生成工程</p>
+</li>
+<li><p>具体语法：</p>
+<ol>
+<li>name：项目名称project</li>
+<li>configs：对应项目中的configuration，默认Debug和Release，自己可定义configuration并制定debug或release</li>
+<li>targets：一个项目下可以有多个target，我的项目暂时只有一个</li>
+<li>configFiles: 可以自定义配置xcconfig的路径</li>
+<li>TARGETED_DEVICE_FAMILY: 1是iPhone，2是iPad，可以都写上</li>
+<li>ASSETCATALOG_COMPILER_APPICON_NAME： app icon</li>
+<li>VALID_ARCHS： 架构</li>
+</ol>
+</li>
+<li><p>案例：</p>
+<ol>
+<li>```<br>name: LSDemo<br>configs: <pre><code>Debug: debug
+Beta: debug
+AppStore: release
+</code></pre>
+targets:<pre><code>LSDemo:
+    type: application
+    platform: iOS
+    deploymentTarget: &quot;11.0&quot;
+    sources:
+        - path: LSDemo
+    configFiles:
+        Debug: xcconfig/Debug.xcconfig
+        Beta: xcconfig/Beta.xcconfig
+        AppStore: xcconfig/AppStore.xcconfig
+    settings:
+        TARGETED_DEVICE_FAMILY: &quot;1&quot;
+  ASSETCATALOG_COMPILER_APPICON_NAME: &quot;AppIcon&quot;
+  VALID_ARCHS: &quot;arm64&quot;
+        
+</code></pre>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    <span class="number">2.</span> 遇到的问题：</span><br><span class="line"></span><br><span class="line">       <span class="number">1.</span> configs和configFiles需要一一对应，不然会找不到</span><br><span class="line">       <span class="number">2.</span> ASSETCATALOG_COMPILER_APPICON_NAME 如果没有对应的asset，在编译最后拷贝资源时会找不到</span><br><span class="line">       <span class="number">3.</span> cocoapods的使用，在xcodegen官网文档中，也说了调用xcodegen之后，正常使用pod install即可，我这里因为自定义了xcconfig文件，cocoapods也会生成对应的xcconfig，pod install 时会有警告，因为丢失了cocoapods的xcconfig，我的解决办法是在自定义的xcconfig中，<span class="keyword">include</span>了pod xcconfig的路径。因为引入了cocoapods的路径，看着有点丑陋，还没有更好的解决办法。</span><br><span class="line"></span><br><span class="line">+ ### xcconfig相关 (<span class="literal">[<span class="identifier">buildSettings</span>中的配置]</span>(http:<span class="comment">//xcodebuildsettings.com/))</span></span><br><span class="line"></span><br><span class="line">  + xcconfig可以互相引入，所以我声明了一个公共的<span class="module-access"><span class="module"><span class="identifier">Common</span>.</span></span>xcconfig，存放大家都有的属性</span><br><span class="line"></span><br><span class="line">    + ```</span><br><span class="line">      PRODUCT_NAME=项目名 </span><br><span class="line">      MARKETING_VERSION=<span class="number">1.0</span>.<span class="number">0</span> <span class="comment">//版本号</span></span><br><span class="line">      CURRENT_PROJECT_VERSION=<span class="number">1.0</span>.<span class="number">0.0</span> <span class="comment">//build号</span></span><br><span class="line">      ENABLE_BITCODE=NO <span class="comment">// bitcode</span></span><br><span class="line">      GCC_PREFIX_HEADER=LSDemo/<span class="module-access"><span class="module"><span class="identifier">LSDemo</span>.</span></span>pch <span class="comment">// pch文件路径</span></span><br><span class="line">      LIBRARY_SEARCH_PATHS=<span class="constructor">$(<span class="params">inherited</span>)</span></span><br><span class="line">      OTHER_LDFLAGS=<span class="constructor">$(<span class="params">inherited</span>)</span></span><br><span class="line">      FRAMEWORK_SEARCH_PATHS=<span class="constructor">$(<span class="params">inherited</span>)</span></span><br><span class="line">      CLANG_WARN_DOCUMENTATION_COMMENTS=NO <span class="comment">// 去掉文档中的警告</span></span><br><span class="line">      ONLY_ACTIVE_ARCH=NO</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>+ </p>
+</li>
+<li><p>每个configuration可以单独配置</p>
+<ul>
+<li><pre><code>PRODUCT_BUNDLE_IDENTIFIER=com.ls.demo // bundle identifier
+GCC_PREPROCESSOR_DEFINITIONS= $(inherited) DEBUG=1 // macro下的定义
+CODE_SIGN_ENTITLEMENTS=LSDemo/Entitlements/LSDemoDebug.entitlements
+CODE_SIGN_STYLE=Manual // 手动签名
+DEVELOPMENT_TEAM=FRH5BS5C4C
+CODE_SIGN_IDENTITY=7EB0B9FB1D43465A8421C40337AE087A69872004
+PROVISIONING_PROFILE_SPECIFIER=6428e46d-aa47-409b-8def-efab2e93bcdb
+INFOPLIST_FILE=LSDemo/Info-Release.plist // info.plist 文件路径
+</code></pre>
+</li>
+<li><p>iOS签名所需：引用自<a target="_blank" rel="noopener" href="https://ajpagente.github.io/mobile/using-xcconfig/">Configure XCode Project Signing with xcconfig</a></p>
+<ul>
+<li>Team Identifier：DEVELOPMENT_TEAM</li>
+<li>Provisioning profile UUID： PROVISIONING_PROFILE_SPECIFIER</li>
+<li>Development certificate SHA-1 hash：CODE_SIGN_IDENTITY</li>
+<li><img src="https://ajpagente.github.io/assets/images/xcconfig/find-signing-parameters.png" alt="Signing parameters"> </li>
+</ul>
+</li>
+</ul>
+<h3 id="遗留问题："><a href="#遗留问题：" class="headerlink" title="遗留问题："></a>遗留问题：</h3><ul>
+<li>拷贝资源时，info.plist不应该拷贝，也拷贝进去了</li>
+<li>文件不想参与编译，但是不想删除，暂时没有做到，文件夹路径下所有文件都会参与编译</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Leisure</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://ugpass.github.io/2022/01/14/2022-01-14%20xcodegen%E7%9A%84%E7%AE%80%E5%8D%95%E5%AE%9E%E7%94%A8/">http://ugpass.github.io/2022/01/14/2022-01-14%20xcodegen%E7%9A%84%E7%AE%80%E5%8D%95%E5%AE%9E%E7%94%A8/</a></span>
+                    </p>
+                
+                
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/iOS/"># iOS</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2021/07/07/2021-07-07%20HashMap%E5%88%86%E6%9E%90/">HashMap分析</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Leisure | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>
