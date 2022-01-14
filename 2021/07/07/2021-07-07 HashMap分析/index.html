@@ -16,7 +16,7 @@
     <meta name="keywords" content="Leisure leisure iOS iPhone">
 
 
-<title>iOS保持界面流畅 | Leisure</title>
+<title>HashMap分析 | Leisure</title>
 
 
 
@@ -165,7 +165,7 @@
     
     <article class="post-wrap">
         <header class="post-header">
-            <h1 class="post-title">iOS保持界面流畅</h1>
+            <h1 class="post-title">HashMap分析</h1>
             
                 <div class="post-meta">
                     
@@ -174,7 +174,7 @@
 
                     
                         <span class="post-time">
-                        Date: <a href="#">七月 4, 2020&nbsp;&nbsp;0:00:00</a>
+                        Date: <a href="#">七月 7, 2021&nbsp;&nbsp;0:00:00</a>
                         </span>
                     
                     
@@ -190,41 +190,78 @@
         </header>
 
         <div class="post-content">
-            <p>参考<a href="%5Bhttps://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/%5D(https://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/)">YYKit作者的博客</a></p>
-<h3 id="CPU和GPU的区别"><a href="#CPU和GPU的区别" class="headerlink" title="CPU和GPU的区别"></a>CPU和GPU的区别</h3><p>CPU(中央处理器 Center Processing Unit)：是计算机的运算、控制、缓存处理核心，常用来处理复杂的逻辑以及数据结构，CPU中的并行其实是通过时间切片完成的。任务之间依赖性高。</p>
-<p>GPU(图形处理器 Graphics Processing Unit)：是一种专门处理绘图运算的微型处理器，在OpenGL中使用GLSL语言来驱动，功能单一，由许多计算单元组成，任务之间依赖性低。</p>
-<hr>
-<h3 id="UIView和CALayer的联系与区别"><a href="#UIView和CALayer的联系与区别" class="headerlink" title="UIView和CALayer的联系与区别"></a>UIView和CALayer的联系与区别</h3><h4 id="UIView和CALayer的联系"><a href="#UIView和CALayer的联系" class="headerlink" title="UIView和CALayer的联系"></a>UIView和CALayer的联系</h4><ul>
-<li>UIView的实力对象中默认有一个属性CALayer</li>
-<li>UIView负责显示内容的管理，CALayer负责具体的显示</li>
-<li>UIView是对CALayer的封装，并实现了CALayer代理的方法</li>
-</ul>
-<h4 id="UIView和CALayer的区别"><a href="#UIView和CALayer的区别" class="headerlink" title="UIView和CALayer的区别"></a>UIView和CALayer的区别</h4><ul>
-<li>UIView继承自UIResponder，CALayer继承自NSObject</li>
-<li>UIView可以响应事件，CALayer不可以</li>
-</ul>
-<h3 id="图像显示原理"><a href="#图像显示原理" class="headerlink" title="图像显示原理"></a>图像显示原理</h3><p>CPU、GPU以及显示器协作完成显示。</p>
+            <h4 id="学习HashMap源码"><a href="#学习HashMap源码" class="headerlink" title="学习HashMap源码"></a>学习HashMap源码</h4><h5 id="Hash"><a href="#Hash" class="headerlink" title="Hash"></a>Hash</h5><ol>
+<li><p>Hash函数</p>
 <ol>
-<li><p>早期的显示是<strong>随机扫描显示</strong>,扫描时间和图形复杂度有关。</p>
+<li>Hash函数是一种摘要算法，具有不可逆性</li>
+<li>常见的Hash算法有MD5，SHA256，SHA512</li>
+</ol>
 </li>
-<li><p>之后出现了<strong>光栅扫描显示</strong>，图像组成了像素阵列，从上到下逐行扫描，和图形复杂度无关。</p>
+<li><p>Hash表</p>
+<ol>
+<li>是一种根据key，快速访问内存上数据的数据结构</li>
+</ol>
+</li>
+<li><p>Hash冲突，如以下代码一样</p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">15 </span>&amp; (<span class="number">10</span> - <span class="number">1</span>) = <span class="number">9</span></span><br><span class="line"><span class="symbol">13 </span>&amp; (<span class="number">10</span> - <span class="number">1</span>) = <span class="number">9</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h5 id="Dictionary-lt-key-value-gt"><a href="#Dictionary-lt-key-value-gt" class="headerlink" title="Dictionary &lt;key: value&gt;"></a>Dictionary &lt;key: value&gt;</h5><ol>
+<li><p>实现方式：数组 + 链表</p>
+<ol>
+<li>数组：查找O(1)，插入/删除O(n)</li>
+<li>链表：查找O(n)，插入/删除O(1)</li>
+</ol>
+</li>
+<li><p>伪代码</p>
+<ol>
+<li><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">数据结构</span><br><span class="line">Class Node &#123;	<span class="regexp">//</span>链表结构</span><br><span class="line">	hash,			<span class="regexp">//</span>key的hash值</span><br><span class="line">	key,</span><br><span class="line">	value,</span><br><span class="line">	Node *<span class="keyword">next</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">Class Table &#123;	<span class="regexp">//</span>数组结构</span><br><span class="line">	Nodes&lt;Node&gt;,		<span class="regexp">//</span>存放Node的数组</span><br><span class="line">	Capacity,				<span class="regexp">//</span>存放元素的个数</span><br><span class="line">	Length,					<span class="regexp">//</span>数组的大小 default <span class="number">1</span>&lt;&lt;<span class="number">4</span> = <span class="number">16</span></span><br><span class="line">	Factory,				<span class="regexp">//</span>扩容因子 defalut <span class="number">0.75</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>数组的index计算方式</p>
+<ol>
+<li><p>Node.hash &amp; (Table.Length - 1)</p>
+<blockquote>
+<p>Table.Length 初始值为16，之后扩容方式为2的N次幂，这样(Table.Length - 1)为奇数，最后一位为1，和key的hash进行位运算之后，可能为奇数，可能为偶数，减少空间浪费。如果(Table.Length - 1)为偶数，则最后一位是0，与任何值进行hash与的运算均为偶数。</p>
+</blockquote>
 </li>
 </ol>
-<ul>
-<li><p>简单的光栅扫描显示由于CPU和GPU的处理复杂程度，会造成GPU扫描显示时，扫描到一半，CPU的数据刷新GPU的缓冲区，显示造成<strong>撕裂</strong>效果。</p>
 </li>
-<li><p>从而引出了 <strong>垂直同步信号Vsync</strong> 和 <strong>双缓冲区</strong> 机制。</p>
-<p><strong>Vsync信号</strong>用来解决<strong>撕裂</strong>问题，相当于给帧缓冲区加了锁，必须扫描显示完一帧才会接收下一帧的数据。</p>
-<p><strong>双缓冲区</strong>用来解决CPU和GPU的处理效率问题。视频控制器读取完缓冲区一帧后，会将指针指向第二个缓冲区。</p>
-<p> 当开启Vsync垂直同步后，GPU会等待显示器的Vsync信号，进行新一帧的渲染和缓冲区的更新，从而需要耗费更多的计算资源，同时也有可能造成<strong>掉帧</strong>现象。<strong>掉帧</strong>是指当接收到Vsync信号时，CPU或GPU还没有准备够足后的数据，视频控制器拿不到Frame Buffer，仍然显示上一帧画面。</p>
+<li><p>根据key 获取value</p>
+<ol>
+<li><pre><code>Node getNode(key) &#123;
+    int hash = hash(key);
+    int n; 
+    Node first;
+    if (table != null &amp;&amp; (n = table.Nodes.Length) &gt; 0 &amp;&amp; (first = table.Nodes[hash &amp; (n - 1)]) != null) &#123;
+        if (first.hash == hash &amp;&amp; first.key == key) &#123;
+            return first;
+        &#125;
+        while (first.next != null) &#123;
+            Node tempNode = first.next;
+            if (tempNode.hash == hash &amp;&amp; tempNode.key == key) &#123;
+                return tempNode;
+            &#125;
+            first = first.next;
+        &#125;
+    &#125;
+    return null;
+&#125;
+</code></pre>
+<p>首先判断数组不为空，数组长度大于0，根据hash算出第一个Node所在的index，取出对应的Node</p>
+<p>然后先判断第一个节点是否匹配，我理解的是因为hash冲突概率低，一般取出第一个即可命中，不需要进入循环</p>
+<p>之后如果不匹配，则遍历链表</p>
 </li>
-<li><p><strong>三级缓存</strong> 和 <strong>Vsync垂直同步</strong>：提供多缓冲区，当Vsync信号出现时有足够的数据去显示，降低<strong>掉帧</strong>出现的概率。</p>
+</ol>
 </li>
-</ul>
-<h3 id="产生卡顿的原因"><a href="#产生卡顿的原因" class="headerlink" title="产生卡顿的原因"></a>产生卡顿的原因</h3><p>CPU负责计算显示的内容，如试图创建、布局计算、图片解码、文本绘制等。CPU计算好之后提交到GPU，由GPU进行一系列处理之后提交到帧缓冲区。当接收到Vsync信号，视频控制器从缓冲区中读取数据。如果在一个Vsync时间内，CPU或GPU没有来得及提交下一帧的数据，视频控制器会显示上一帧的，即界面保持不变，这就是卡顿的原因。</p>
-<p>解决卡顿的方案待理解补充，<a href="%5Bhttps://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/%5D(https://blog.ibireme.com/2015/11/12/smooth_user_interfaces_for_ios/)">YYKit作者的博客</a>写的很详细了。</p>
-<p>有理解不当之处，欢迎指正。
- </p>
+<li><p> 存储key-value</p>
+</li>
+<li><p>在Android中，当冲突中的链表长度大于8时，则将链表转化为红黑树</p>
+</li>
+<li><p>使用红黑树的原因是查找效率更高</p>
+</li>
+<li><p>个数小于8时，不使用红黑树，是为了节省内存</p>
+</li>
+</ol>
+</li>
+</ol>
 
         </div>
 
@@ -239,7 +276,7 @@
                 
                     <p class="copyright-item">
                         <span>Permalink:</span>
-                        <span><a href="http://ugpass.github.io/2020/07/04/2020-07-04-iOS%E4%BF%9D%E6%8C%81%E7%95%8C%E9%9D%A2%E6%B5%81%E7%95%85/">http://ugpass.github.io/2020/07/04/2020-07-04-iOS%E4%BF%9D%E6%8C%81%E7%95%8C%E9%9D%A2%E6%B5%81%E7%95%85/</a></span>
+                        <span><a href="http://ugpass.github.io/2021/07/07/2021-07-07%20HashMap%E5%88%86%E6%9E%90/">http://ugpass.github.io/2021/07/07/2021-07-07%20HashMap%E5%88%86%E6%9E%90/</a></span>
                     </p>
                 
                 
@@ -266,10 +303,10 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2020/07/07/2020-07-07-iOS%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/">iOS离屏渲染解析</a>
+                <a class="prev" rel="prev" href="/2022/01/14/2022-01-14%20xcodegen%E7%9A%84%E7%AE%80%E5%8D%95%E5%AE%9E%E7%94%A8/">xcodegen相关</a>
             
             
-            <a class="next" rel="next" href="/2020/07/03/2020-07-03-iOS%E5%9B%BE%E7%89%87%E8%A7%A3%E7%A0%81/">iOS图片解码</a>
+            <a class="next" rel="next" href="/2021/06/25/2021-06-24-Objective-C%20Dispatch%20Direct/">Objective-C Dispatch Direct</a>
             
         </section>
 
