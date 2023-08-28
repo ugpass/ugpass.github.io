@@ -190,45 +190,11 @@
         </header>
 
         <div class="post-content">
-            <h2 id="Objective-C-Dispatch-Direct"><a href="#Objective-C-Dispatch-Direct" class="headerlink" title="Objective-C Dispatch Direct"></a>Objective-C Dispatch Direct</h2><h3 id="Method-通过给Clang-传递-objc-direct"><a href="#Method-通过给Clang-传递-objc-direct" class="headerlink" title="Method 通过给Clang 传递 objc_direct"></a>Method 通过给Clang 传递 objc_direct</h3><pre><code>@interface Tool : NSObject
-- (void)printMySelf;
-@end
+            <h2 id="Objective-C-Dispatch-Direct"><a href="#Objective-C-Dispatch-Direct" class="headerlink" title="Objective-C Dispatch Direct"></a>Objective-C Dispatch Direct</h2><h3 id="Method-通过给Clang-传递-objc-direct"><a href="#Method-通过给Clang-传递-objc-direct" class="headerlink" title="Method 通过给Clang 传递 objc_direct"></a>Method 通过给Clang 传递 objc_direct</h3><figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">@interface</span> Tool : NSObject</span><br><span class="line">- (void)printMySelf<span class="comment">;</span></span><br><span class="line"><span class="title">@end</span></span><br><span class="line"></span><br><span class="line">    <span class="number">0x100a60825</span> &lt;+<span class="number">85</span>&gt;:  movq   <span class="variable">%rax</span><span class="punctuation">,</span> <span class="number">-0</span><span class="keyword">x</span><span class="number">28</span>(<span class="variable">%rbp</span>)</span><br><span class="line">-&gt;  <span class="number">0x100a60829</span> &lt;+<span class="number">89</span>&gt;:  movq   <span class="number">-0</span><span class="keyword">x</span><span class="number">28</span>(<span class="variable">%rbp</span>)<span class="punctuation">,</span> <span class="variable">%rax</span></span><br><span class="line">    <span class="number">0x100a6082d</span> &lt;+<span class="number">93</span>&gt;:  movq   <span class="number">0x7fec</span>(<span class="variable">%rip</span>)<span class="punctuation">,</span> <span class="variable">%rsi</span>        <span class="comment">; &quot;printMySelf&quot;</span></span><br><span class="line">    <span class="number">0x100a60834</span> &lt;+<span class="number">100</span>&gt;: movq   <span class="variable">%rax</span><span class="punctuation">,</span> <span class="variable">%rdi</span></span><br><span class="line">    <span class="number">0x100a60837</span> &lt;+<span class="number">103</span>&gt;: callq  *<span class="number">0x27d3</span>(<span class="variable">%rip</span>)             <span class="comment">; (void *)0x00007fff20175280: objc_msgSend</span></span><br></pre></td></tr></table></figure>
 
-    0x100a60825 &lt;+85&gt;:  movq   %rax, -0x28(%rbp)
--&gt;  0x100a60829 &lt;+89&gt;:  movq   -0x28(%rbp), %rax
-    0x100a6082d &lt;+93&gt;:  movq   0x7fec(%rip), %rsi        ; &quot;printMySelf&quot;
-    0x100a60834 &lt;+100&gt;: movq   %rax, %rdi
-    0x100a60837 &lt;+103&gt;: callq  *0x27d3(%rip)             ; (void *)0x00007fff20175280: objc_msgSend
-</code></pre>
 <p>上述代码 调用时，根据汇编显示callq 调用objc_msgSend发送“printMySelf”的消息</p>
-<pre><code>@interface Tool : NSObject
-- (void)printMySelf __attribute__((objc_direct));
-@end
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">@interface Tool : NSObject</span><br><span class="line">- (void)printMySelf <span class="constructor">__attribute__((<span class="params">objc_direct</span>)</span>);</span><br><span class="line">@<span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="number">0x10270c835</span> &lt;+<span class="number">85</span>&gt;:  movq   %rax, -<span class="number">0x28</span>(%rbp)</span><br><span class="line">-&gt;  <span class="number">0x10270c839</span> &lt;+<span class="number">89</span>&gt;:  movq   -<span class="number">0x28</span>(%rbp), %rax</span><br><span class="line">    <span class="number">0x10270c83d</span> &lt;+<span class="number">93</span>&gt;:  movq   %rax, %rdi</span><br><span class="line">    <span class="number">0x10270c840</span> &lt;+<span class="number">96</span>&gt;:  callq  <span class="number">0x10270c2f0</span>               ; -<span class="literal">[T<span class="identifier">ool</span> <span class="identifier">printMySelf</span>]</span> at <span class="module-access"><span class="module"><span class="identifier">Tool</span>.</span></span>m:<span class="number">33</span></span><br><span class="line">    <span class="number">0x10270c845</span> &lt;+<span class="number">101</span>&gt;: xorl   %r8d, %r8d</span><br><span class="line">    <span class="number">0x10270c848</span> &lt;+<span class="number">104</span>&gt;: movl   %r8d, %esi</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment"> 打印类的实例方法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">void print<span class="constructor">AllInstanceMethod(Class <span class="params">cls</span>)</span> &#123;</span><br><span class="line">    unsigned <span class="built_in">int</span> count;</span><br><span class="line">    Method *methods = <span class="keyword">class</span><span class="constructor">_copyMethodList(<span class="params">cls</span>, &amp;<span class="params">count</span>)</span>;</span><br><span class="line">    NSMutableArray *mutableA = <span class="literal">[NSM<span class="identifier">utableArray</span> <span class="identifier">arrayWithCapacity</span>:<span class="number">10</span>]</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">        NSString *methodName = <span class="constructor">NSStringFromSelector(<span class="params">method_getName</span>(<span class="params">methods</span>[<span class="params">i</span>])</span>);</span><br><span class="line">        <span class="literal">[<span class="identifier">mutableA</span> <span class="identifier">addObject</span>:<span class="identifier">methodName</span>]</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (NSString *methodName <span class="keyword">in</span> mutableA) &#123;</span><br><span class="line">        <span class="constructor">NSLog(@<span class="string">&quot;%@ has Method - %@&quot;</span>, <span class="params">cls</span>, <span class="params">methodName</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    0x10270c835 &lt;+85&gt;:  movq   %rax, -0x28(%rbp)
--&gt;  0x10270c839 &lt;+89&gt;:  movq   -0x28(%rbp), %rax
-    0x10270c83d &lt;+93&gt;:  movq   %rax, %rdi
-    0x10270c840 &lt;+96&gt;:  callq  0x10270c2f0               ; -[Tool printMySelf] at Tool.m:33
-    0x10270c845 &lt;+101&gt;: xorl   %r8d, %r8d
-    0x10270c848 &lt;+104&gt;: movl   %r8d, %esi
-    
-    
- /**
- 打印类的实例方法
- */
-void printAllInstanceMethod(Class cls) &#123;
-    unsigned int count;
-    Method *methods = class_copyMethodList(cls, &amp;count);
-    NSMutableArray *mutableA = [NSMutableArray arrayWithCapacity:10];
-    for (int i = 0; i &lt; count; i++) &#123;
-        NSString *methodName = NSStringFromSelector(method_getName(methods[i]));
-        [mutableA addObject:methodName];
-    &#125;
-    for (NSString *methodName in mutableA) &#123;
-        NSLog(@&quot;%@ has Method - %@&quot;, cls, methodName);
-    &#125;
-&#125;
-</code></pre>
 <ol>
 <li>上述代码 给函数通过给Clang传递<strong>objc_direct</strong>属性调用时，汇编显示callq 直接调用函数</li>
 <li>此时通过 <code>Method originMethod = class_getInstanceMethod([self class], @selector(printMySelf));</code>  获取该方法的Method时，会报如下错误 @selector expression formed with direct selector ‘printMySelf’ ，证明此时该方法不能被常见的runtime进行方法交换</li>
@@ -238,59 +204,25 @@ void printAllInstanceMethod(Class cls) &#123;
 <li>一个direct method，不能被子类重写，会报如下错误 Cannot override a method that is declared direct by a superclass，同时在direct method中调用super也会报错</li>
 <li>协议中不能声明属性和方法为 direct，会报以下错误 ‘objc_direct’ attribute cannot be applied to properties declared in an Objective-C protocol</li>
 </ol>
-<h3 id="Property-通过-direct进行修饰"><a href="#Property-通过-direct进行修饰" class="headerlink" title="Property 通过 direct进行修饰"></a>Property 通过 <strong>direct</strong>进行修饰</h3><pre><code>@interface Tool : NSObject
-@property (nonatomic, strong) NSString *name;
-@end
-</code></pre>
-<p>我们都知道平时声明属性时，编译器会帮助我们生成_name成员变量、setter、getter方法</p>
-<pre><code>@interface Tool : NSObject
-@property (nonatomic, strong, direct) NSString *name;
-@end
+<h3 id="Property-通过-direct进行修饰"><a href="#Property-通过-direct进行修饰" class="headerlink" title="Property 通过 direct进行修饰"></a>Property 通过 <strong>direct</strong>进行修饰</h3><figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">@interface</span> <span class="attribute">Tool </span>: NSObject</span><br><span class="line"><span class="variable">@property</span> (nonatomic, strong) NSString *name;</span><br><span class="line"><span class="variable">@end</span></span><br></pre></td></tr></table></figure>
 
-/**
- 打印实例对象的成员变量
- */
-void printAllIvars(NSObject *obj) &#123;
-    unsigned int count;
-    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-    Ivar *list = class_copyIvarList([obj class], &amp;count);
-    for (int i = 0; i &lt; count; i++) &#123;
-        NSString *ivarName = [NSString stringWithUTF8String:ivar_getName(list[i])];
-        id ivarValue = [obj valueForKey:ivarName];
-        if (ivarValue) &#123;
-            dict[ivarName] = ivarValue;
-        &#125;else&#123;
-            dict[ivarName] = @&quot;&quot;;
-        &#125;
-    &#125;
-    for (NSString *ivarName in dict.allKeys) &#123;
-        NSLog(@&quot;ivarName:%@,ivarValue:%@&quot;,ivarName,dict[ivarName]);
-    &#125;
-&#125;
-</code></pre>
+<p>我们都知道平时声明属性时，编译器会帮助我们生成_name成员变量、setter、getter方法</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Tool</span> : <span class="title">NSObject</span></span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>, direct) <span class="built_in">NSString</span> *name;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 打印实例对象的成员变量</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">void</span> printAllIvars(<span class="built_in">NSObject</span> *obj) &#123;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> count;</span><br><span class="line">    <span class="built_in">NSMutableDictionary</span> *dict = [<span class="built_in">NSMutableDictionary</span> dictionary];</span><br><span class="line">    Ivar *list = class_copyIvarList([obj <span class="keyword">class</span>], &amp;count);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">        <span class="built_in">NSString</span> *ivarName = [<span class="built_in">NSString</span> stringWithUTF8String:ivar_getName(list[i])];</span><br><span class="line">        <span class="keyword">id</span> ivarValue = [obj valueForKey:ivarName];</span><br><span class="line">        <span class="keyword">if</span> (ivarValue) &#123;</span><br><span class="line">            dict[ivarName] = ivarValue;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            dict[ivarName] = <span class="string">@&quot;&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="built_in">NSString</span> *ivarName <span class="keyword">in</span> dict.allKeys) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;ivarName:%@,ivarValue:%@&quot;</span>,ivarName,dict[ivarName]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>通过查看汇编，对应的setter 和 getter方法都是直接调用，不再走objc_msgSend流程；通过runtime获取成员变量列表，仍然有对应的_name成员变量</p>
-<pre><code>t.name= @&quot;zhangsan&quot;;
-[t addObserver:self forKeyPath:@&quot;name&quot; options:NSKeyValueObservingOptionNew context:nil];
-t.name = @&quot;lisi&quot;;
-</code></pre>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">t.name</span>= @<span class="string">&quot;zhangsan&quot;</span><span class="comment">;</span></span><br><span class="line"><span class="section">[t addObserver:self forKeyPath:@&quot;name&quot; options:NSKeyValueObservingOptionNew context:nil]</span><span class="comment">;</span></span><br><span class="line"><span class="attr">t.name</span> = @<span class="string">&quot;lisi&quot;</span><span class="comment">;</span></span><br></pre></td></tr></table></figure>
+
 <p>由于没有setter方法，故kvo时，并没有任何回调</p>
 <p>现在属性修饰词有以下16个</p>
-<pre><code> setter getter
- readwrite readonly
- strong weak copy assign unsafe_unretained
- nullable nonnull null_resettable
- atomic nonatomic
- class direct
-</code></pre>
-<h3 id="objc-direct-members-修饰"><a href="#objc-direct-members-修饰" class="headerlink" title="objc_direct_members 修饰"></a><code>objc_direct_members</code> 修饰</h3><pre><code>__attribute__((objc_direct_members))
-@interface Tool()
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">setter</span> <span class="keyword">getter</span></span><br><span class="line"><span class="keyword">readwrite</span> <span class="keyword">readonly</span></span><br><span class="line"><span class="keyword">strong</span> <span class="keyword">weak</span> <span class="keyword">copy</span> <span class="keyword">assign</span> <span class="keyword">unsafe_unretained</span></span><br><span class="line"><span class="keyword">nullable</span> <span class="keyword">nonnull</span> <span class="keyword">null_resettable</span></span><br><span class="line">atomic <span class="keyword">nonatomic</span></span><br><span class="line"><span class="keyword">class</span> direct</span><br></pre></td></tr></table></figure>
 
-@end
-</code></pre>
+
+
+<h3 id="objc-direct-members-修饰"><a href="#objc-direct-members-修饰" class="headerlink" title="objc_direct_members 修饰"></a><code>objc_direct_members</code> 修饰</h3><figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="constructor">__attribute__((<span class="params">objc_direct_members</span>)</span>)</span><br><span class="line">@interface <span class="constructor">Tool()</span></span><br><span class="line"></span><br><span class="line">@<span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
 <p>在接口处添加修饰，没有任何作用</p>
-<pre><code>__attribute__((objc_direct_members))
-@implementation Tool
-</code></pre>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">__attribute__((objc_direct_members))</span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">Tool</span></span></span><br></pre></td></tr></table></figure>
+
 <p>在实现处添加修饰，则之前未声明的成员为直接成员，以及之前未声明的方法也会被直接调用</p>
 <blockquote>
 <p> 直接派发的效率和C语言调用一样，但是Objective-C的objc_msgSend在汇编和缓存层面做了很大的优化，调用效率相差并不会很大。</p>
