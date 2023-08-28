@@ -116,7 +116,7 @@ theme: Chic
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: git
-  repository: https://github.com/ugpass/ugpass.github.io
+  repository: https://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@github.com/ugpass/ugpass.github.io.git 
   branch: master
   name: ugpass
   email: 565131583@qq.com
